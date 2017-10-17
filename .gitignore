@@ -1,5 +1,6 @@
 # CMake build file
 build/
+x64/
 # Ide files
 .vs/
 nbproject/
