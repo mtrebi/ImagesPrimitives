@@ -1,15 +1,17 @@
 #include <iostream>
-#include "ImageUtils.h"
+#include "Image.h"
+#include "Approximator.h"
+#include <math.h>
 
 int main() {
-  BMP target_image = ImageUtils::Read("../assets/monalisa.bmp");
-  const RGBApixel average_color = ImageUtils::AverageColor(target_image);
+  // Initialization
+  Image target = Image("../assets/monalisa.bmp");
+  
+  // Approximate Image using Hill Climber algorithm
+  Image current = Approximator(target).Run();
 
-
-  BMP current_image = ImageUtils::New(target_image.TellWidth(), target_image.TellHeight(), target_image.TellBitDepth(), target_image.TellHorizontalDPI(), target_image.TellVerticalDPI());
-  ImageUtils::SetBaseColor(current_image, average_color);
-
-  ImageUtils::Write(current_image, "monalisa_out.bmp");
+  // Write output
+  current.Export("output.bmp");
 
   return 0;
 }
