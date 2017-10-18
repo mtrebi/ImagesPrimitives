@@ -50,8 +50,7 @@ private:
     // TODO More Shapes
     return Triangle(generator_.RandomPoint(), 
                     generator_.RandomPoint(),
-                    generator_.RandomPoint(),
-                    generator_.RandomColor());
+                    generator_.RandomPoint());
   }
 
   Triangle MutateShape(const Triangle shape) const {
