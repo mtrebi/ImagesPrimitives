@@ -178,8 +178,8 @@ bool BMP::SetColor( int ColorNumber , RGBApixel NewColor )
  return true;
 }
 
-// RGBApixel BMP::GetColor( int ColorNumber ) const
-RGBApixel BMP::GetColor( int ColorNumber )
+RGBApixel BMP::GetColor( int ColorNumber ) const
+//RGBApixel BMP::GetColor( int ColorNumber )
 { 
  RGBApixel Output;
  Output.Red   = 255;
@@ -239,8 +239,8 @@ BMP::BMP()
  SizeOfMetaData2 = 0;
 }
 
-// BMP::BMP( const BMP& Input )
-BMP::BMP( BMP& Input )
+BMP::BMP( const BMP& Input )
+//BMP::BMP( BMP& Input )
 {
  // first, make the image empty.
 
@@ -287,8 +287,8 @@ BMP::BMP( BMP& Input )
  {
   for( int i=0; i < Width ; i++ )
   {
-   Pixels[i][j] = *Input(i,j);
-//   Pixels[i][j] = Input.GetPixel(i,j); // *Input(i,j);
+   //Pixels[i][j] = *Input(i,j);
+   Pixels[i][j] = Input.GetPixel(i,j); // *Input(i,j);
   }
  }
 }
@@ -1277,16 +1277,20 @@ void BMP::SetDPI( int HorizontalDPI, int VerticalDPI )
 int BMP::TellVerticalDPI( void ) const
 //int BMP::TellVerticalDPI( void )
 {
+  /*
  if( !YPelsPerMeter )
  { YPelsPerMeter = DefaultYPelsPerMeter; }
+ */
  return (int) ( YPelsPerMeter / (double) 39.37007874015748 ); 
 }
 
 int BMP::TellHorizontalDPI( void ) const
 //int BMP::TellHorizontalDPI( void )
 {
+  /*
  if( !XPelsPerMeter )
  { XPelsPerMeter = DefaultXPelsPerMeter; }
+ */
  return (int) ( XPelsPerMeter / (double) 39.37007874015748 );
 }
 

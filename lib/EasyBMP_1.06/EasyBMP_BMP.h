@@ -65,7 +65,7 @@ class BMP
  int TellHorizontalDPI( void ) const;
   
  BMP();
- BMP( BMP& Input );
+ BMP(const BMP& Input );
  ~BMP();
  RGBApixel* operator()(int i,int j);
  
@@ -79,7 +79,7 @@ class BMP
  bool WriteToFile( const char* FileName );
  bool ReadFromFile( const char* FileName );
  
- RGBApixel GetColor( int ColorNumber );
+ RGBApixel GetColor( int ColorNumber ) const;
  bool SetColor( int ColorNumber, RGBApixel NewColor ); 
 };
 
