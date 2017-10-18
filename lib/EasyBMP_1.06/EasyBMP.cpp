@@ -1273,16 +1273,16 @@ void BMP::SetDPI( int HorizontalDPI, int VerticalDPI )
  YPelsPerMeter = (int) (   VerticalDPI * 39.37007874015748 );
 }
 
-// int BMP::TellVerticalDPI( void ) const
-int BMP::TellVerticalDPI( void )
+int BMP::TellVerticalDPI( void ) const
+//int BMP::TellVerticalDPI( void )
 {
  if( !YPelsPerMeter )
  { YPelsPerMeter = DefaultYPelsPerMeter; }
  return (int) ( YPelsPerMeter / (double) 39.37007874015748 ); 
 }
 
-// int BMP::TellHorizontalDPI( void ) const
-int BMP::TellHorizontalDPI( void )
+int BMP::TellHorizontalDPI( void ) const
+//int BMP::TellHorizontalDPI( void )
 {
  if( !XPelsPerMeter )
  { XPelsPerMeter = DefaultXPelsPerMeter; }

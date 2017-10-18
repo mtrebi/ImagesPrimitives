@@ -61,8 +61,8 @@ class BMP
  int TellHeight( void ) const;
  int TellNumberOfColors( void ) const;
  void SetDPI( int HorizontalDPI, int VerticalDPI );
- int TellVerticalDPI( void );
- int TellHorizontalDPI( void );
+ int TellVerticalDPI( void ) const;
+ int TellHorizontalDPI( void ) const;
   
  BMP();
  BMP( BMP& Input );
