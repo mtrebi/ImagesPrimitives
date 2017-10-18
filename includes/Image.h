@@ -4,29 +4,29 @@
 
 class Image {
 private:
-  BMP image_;
+  BMP bmp_;
 public:
   Image(const std::string image_path) {
-    image_.ReadFromFile(image_path.c_str());
+    bmp_.ReadFromFile(image_path.c_str());
   }
 
   Image(const int width, const int height, const int bitdepth, const int hDPI, const int vDPI) {
-    image_.SetSize(width, height);
-    image_.SetBitDepth(bitdepth);
-    image_.SetDPI(hDPI, vDPI);
+    bmp_.SetSize(width, height);
+    bmp_.SetBitDepth(bitdepth);
+    bmp_.SetDPI(hDPI, vDPI);
   }
 
   bool Export(const std::string path) {
-    return image_.WriteToFile(path.c_str());
+    return bmp_.WriteToFile(path.c_str());
   }
 
   RGBApixel AverageColor() const {
     long r = 0,
           g = 0,
           b = 0;
-    for (int i = 0; i < image_.TellWidth(); ++i) {
-      for (int j = 0; j < image_.TellHeight(); ++j) {
-        const RGBApixel color = image_.GetPixel(i, j);
+    for (int i = 0; i < bmp_.TellWidth(); ++i) {
+      for (int j = 0; j < bmp_.TellHeight(); ++j) {
+        const RGBApixel color = bmp_.GetPixel(i, j);
         r += color.Red;
         g += color.Green;
         b += color.Blue;
@@ -34,17 +34,17 @@ public:
     }
 
     RGBApixel average_color;
-    average_color.Red = r / (image_.TellWidth() * image_.TellHeight());
-    average_color.Green = g / (image_.TellWidth() * image_.TellHeight());
-    average_color.Blue = b / (image_.TellWidth() * image_.TellHeight());
+    average_color.Red = r / (bmp_.TellWidth() * bmp_.TellHeight());
+    average_color.Green = g / (bmp_.TellWidth() * bmp_.TellHeight());
+    average_color.Blue = b / (bmp_.TellWidth() * bmp_.TellHeight());
 
     return average_color;
   }
 
   void SetBaseColor(const RGBApixel color) {
-    for (int i = 0; i < image_.TellWidth(); ++i) {
-      for (int j = 0; j < image_.TellHeight(); ++j) {
-        image_.SetPixel(i, j, color);
+    for (int i = 0; i < bmp_.TellWidth(); ++i) {
+      for (int j = 0; j < bmp_.TellHeight(); ++j) {
+        bmp_.SetPixel(i, j, color);
       }
     }
   }
