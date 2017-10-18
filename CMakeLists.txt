@@ -11,7 +11,9 @@ include_directories (
 )
 
 
-set(SOURCES src/main.cpp)
+set(SOURCES src/Point.cpp
+			src/Vector.cpp
+			src/main.cpp)
 
 add_compile_options(
 	-std=c++11
