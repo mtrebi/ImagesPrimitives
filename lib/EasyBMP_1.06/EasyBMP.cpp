@@ -17,6 +17,7 @@
 * description: Actual source file                *
 *                                                *
 *************************************************/
+#pragma once
 
 #include "EasyBMP.h"
 
