@@ -16,9 +16,15 @@ public:
     bmp_.SetDPI(hDPI, vDPI);
   }
 
-  bool Export(const std::string path) {
-    return bmp_.WriteToFile(path.c_str());
-  }
+  bool Export(const std::string path) { return bmp_.WriteToFile(path.c_str()); }
+
+  RGBApixel GetPixel(const int i, const int j) const { return bmp_.GetPixel(i, j); }
+  int GetWidth() const { return bmp_.TellWidth(); }
+  int GetHeight() const { return bmp_.TellHeight(); }
+  int GetBitDepth() const { return bmp_.TellBitDepth(); }
+  int GetVDPI() const { return bmp_.TellVerticalDPI(); }
+  int GetHDPI() const { return bmp_.TellHorizontalDPI(); }
+  int GetSize() const { bmp_.TellWidth() * bmp_.TellHeight(); }
 
   RGBApixel AverageColor() const {
     long r = 0,
@@ -47,6 +53,10 @@ public:
         bmp_.SetPixel(i, j, color);
       }
     }
+  }
+
+  void AddShape(Shape * shape) {
+    // Rasterize shape
   }
 
 };
