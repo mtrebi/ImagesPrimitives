@@ -328,20 +328,20 @@ RGBApixel* BMP::operator()(int i, int j)
  return &(Pixels[i][j]);
 }
 
-// int BMP::TellBitDepth( void ) const
-int BMP::TellBitDepth( void )
+int BMP::TellBitDepth( void ) const
+//int BMP::TellBitDepth( void )
 { return BitDepth; }
 
-// int BMP::TellHeight( void ) const
-int BMP::TellHeight( void )
+int BMP::TellHeight( void ) const
+//int BMP::TellHeight( void )
 { return Height; }
 
-// int BMP::TellWidth( void ) const
-int BMP::TellWidth( void )
+int BMP::TellWidth( void ) const
+//int BMP::TellWidth( void )
 { return Width; }
 
-// int BMP::TellNumberOfColors( void ) const
-int BMP::TellNumberOfColors( void )
+int BMP::TellNumberOfColors( void ) const
+//int BMP::TellNumberOfColors( void )
 {
  int output = IntPow( 2, BitDepth );
  if( BitDepth == 32 )

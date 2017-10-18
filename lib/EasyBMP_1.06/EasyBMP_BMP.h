@@ -56,10 +56,10 @@ class BMP
 
  public: 
 
- int TellBitDepth( void );
- int TellWidth( void );
- int TellHeight( void );
- int TellNumberOfColors( void );
+ int TellBitDepth( void ) const;
+ int TellWidth( void ) const;
+ int TellHeight( void ) const;
+ int TellNumberOfColors( void ) const;
  void SetDPI( int HorizontalDPI, int VerticalDPI );
  int TellVerticalDPI( void );
  int TellHorizontalDPI( void );
