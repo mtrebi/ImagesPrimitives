@@ -228,14 +228,14 @@ BMP::BMP()
  BitDepth = 24;
  Pixels = new RGBApixel* [Width];
  Pixels[0] = new RGBApixel [Height];
- Colors = NULL;
+ Colors = nullptr;
  
  XPelsPerMeter = 0;
  YPelsPerMeter = 0;
  
- MetaData1 = NULL;
+ MetaData1 = nullptr;
  SizeOfMetaData1 = 0;
- MetaData2 = NULL;
+ MetaData2 = nullptr;
  SizeOfMetaData2 = 0;
 }
 
@@ -249,13 +249,13 @@ BMP::BMP( const BMP& Input )
  BitDepth = 24;
  Pixels = new RGBApixel* [Width];
  Pixels[0] = new RGBApixel [Height];
- Colors = NULL; 
+ Colors = nullptr; 
  XPelsPerMeter = 0;
  YPelsPerMeter = 0;
  
- MetaData1 = NULL;
+ MetaData1 = nullptr;
  SizeOfMetaData1 = 0;
- MetaData2 = NULL;
+ MetaData2 = nullptr;
  SizeOfMetaData2 = 0;
 
  // now, set the correct bit depth
@@ -293,15 +293,145 @@ BMP::BMP( const BMP& Input )
  }
 }
 
+
+BMP::BMP(BMP&& other) {
+  Width = 1;
+  Height = 1;
+  BitDepth = 24;
+  Pixels = new RGBApixel*[Width];
+  Pixels[0] = new RGBApixel[Height];
+  Colors = nullptr;
+  XPelsPerMeter = 0;
+  YPelsPerMeter = 0;
+
+  MetaData1 = nullptr;
+  SizeOfMetaData1 = 0;
+  MetaData2 = nullptr;
+  SizeOfMetaData2 = 0;
+
+  // now, set the correct bit depth
+
+  SetBitDepth(other.TellBitDepth());
+
+  // set the correct pixel size 
+
+  SetSize(other.TellWidth(), other.TellHeight());
+
+  // set the DPI information from Input
+
+  SetDPI(other.TellHorizontalDPI(), other.TellVerticalDPI());
+
+  // if there is a color table, get all the colors
+  Colors = other.Colors;
+  Pixels = other.Pixels;
+
+  other.Colors = nullptr;
+  other.Pixels = nullptr;
+}
+
+
+BMP& BMP::operator=(const BMP& other) {
+  // first, make the image empty.
+
+  Width = 1;
+  Height = 1;
+  BitDepth = 24;
+  Pixels = new RGBApixel*[Width];
+  Pixels[0] = new RGBApixel[Height];
+  Colors = nullptr;
+  XPelsPerMeter = 0;
+  YPelsPerMeter = 0;
+
+  MetaData1 = nullptr;
+  SizeOfMetaData1 = 0;
+  MetaData2 = nullptr;
+  SizeOfMetaData2 = 0;
+
+  // now, set the correct bit depth
+
+  SetBitDepth(other.TellBitDepth());
+
+  // set the correct pixel size 
+
+  SetSize(other.TellWidth(), other.TellHeight());
+
+  // set the DPI information from Input
+
+  SetDPI(other.TellHorizontalDPI(), other.TellVerticalDPI());
+
+  // if there is a color table, get all the colors
+
+  if (BitDepth == 1 || BitDepth == 4 ||
+    BitDepth == 8)
+  {
+    for (int k = 0; k < TellNumberOfColors(); k++)
+    {
+      SetColor(k, other.GetColor(k));
+    }
+  }
+
+  // get all the pixels 
+
+  for (int j = 0; j < Height; j++)
+  {
+    for (int i = 0; i < Width; i++)
+    {
+      //Pixels[i][j] = *Input(i,j);
+      Pixels[i][j] = other.GetPixel(i, j); // *Input(i,j);
+    }
+  }
+
+  return *this;
+}
+
+BMP& BMP::operator=(BMP&& other) {
+  Width = 1;
+  Height = 1;
+  BitDepth = 24;
+  Pixels = new RGBApixel*[Width];
+  Pixels[0] = new RGBApixel[Height];
+  Colors = nullptr;
+  XPelsPerMeter = 0;
+  YPelsPerMeter = 0;
+
+  MetaData1 = nullptr;
+  SizeOfMetaData1 = 0;
+  MetaData2 = nullptr;
+  SizeOfMetaData2 = 0;
+
+  // now, set the correct bit depth
+
+  SetBitDepth(other.TellBitDepth());
+
+  // set the correct pixel size 
+
+  SetSize(other.TellWidth(), other.TellHeight());
+
+  // set the DPI information from Input
+
+  SetDPI(other.TellHorizontalDPI(), other.TellVerticalDPI());
+
+  // if there is a color table, get all the colors
+  Colors = other.Colors;
+  Pixels = other.Pixels;
+
+  other.Colors = nullptr;
+  other.Pixels = nullptr;
+
+  return *this;
+}
+
+
 BMP::~BMP()
 {
- int i;
- for(i=0;i<Width;i++)
- { delete [] Pixels[i]; }
- delete [] Pixels;
+  if (Pixels) {
+    for (int i = 0; i<Width; i++) {
+      delete[] Pixels[i];
+    }
+    delete[] Pixels;
+  }
  if( Colors )
  { delete [] Colors; }
- 
  if( MetaData1 )
  { delete [] MetaData1; }
  if( MetaData2 )
@@ -374,7 +504,7 @@ bool BMP::SetBitDepth( int NewDepth )
  if( BitDepth == 1 || BitDepth == 4 || BitDepth == 8 )
  { Colors = new RGBApixel [NumberOfColors]; }
  else
- { Colors = NULL; } 
+ { Colors = nullptr; } 
  if( BitDepth == 1 || BitDepth == 4 || BitDepth == 8 )
  { CreateStandardColorTable(); }
  
@@ -439,7 +569,7 @@ bool BMP::WriteToFile( const char* FileName )
  }
  
  FILE* fp = fopen( FileName, "wb" );
- if( fp == NULL )
+ if( fp == nullptr )
  {
   if( EasyBMPwarnings )
   {
@@ -683,7 +813,7 @@ bool BMP::ReadFromFile( const char* FileName )
  }
 
  FILE* fp = fopen( FileName, "rb" );
- if( fp == NULL )
+ if( fp == nullptr )
  {
   if( EasyBMPwarnings )
   {

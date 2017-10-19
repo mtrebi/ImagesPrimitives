@@ -66,6 +66,11 @@ class BMP
   
  BMP();
  BMP(const BMP& Input );
+ BMP(BMP&& Input);
+
+ BMP& operator=(const BMP& other);
+ BMP& operator=(BMP&& other);
+
  ~BMP();
  RGBApixel* operator()(int i,int j);
  
