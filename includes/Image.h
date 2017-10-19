@@ -1,4 +1,5 @@
 #pragma once
+#include "Triangle.h"
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
 
 
@@ -15,8 +16,31 @@ public:
     bmp_.SetBitDepth(bitdepth);
     bmp_.SetDPI(hDPI, vDPI);
   }
+  
+  Image(const Image& image) {
+    bmp_ = BMP(image.bmp_);
+  }
 
-  bool Export(const std::string path) { return bmp_.WriteToFile(path.c_str()); }
+  Image& operator=(const Image& image)  {
+    bmp_ = BMP(image.bmp_);
+    return *this;
+  }
+
+  Image(Image&& image) {
+    bmp_ = std::move(image.bmp_);
+    int a = 2;
+  }
+
+  Image& operator=(Image&& image) {
+    bmp_ = std::move(image.bmp_);
+    int a = 2;
+    return *this;
+  }
+
+
+  bool Export(const std::string path) { 
+    return bmp_.WriteToFile(path.c_str()); 
+  }
 
   RGBApixel GetPixel(const int i, const int j) const { return bmp_.GetPixel(i, j); }
   int GetWidth() const { return bmp_.TellWidth(); }
@@ -24,7 +48,12 @@ public:
   int GetBitDepth() const { return bmp_.TellBitDepth(); }
   int GetVDPI() const { return bmp_.TellVerticalDPI(); }
   int GetHDPI() const { return bmp_.TellHorizontalDPI(); }
-  int GetSize() const { bmp_.TellWidth() * bmp_.TellHeight(); }
+  int GetSize() const { return bmp_.TellWidth() * bmp_.TellHeight(); }
+
+
+  void SetPixel(const int x, const int y, const RGBApixel& color) {
+    bmp_.SetPixel(x, y, color);
+  }
 
   RGBApixel AverageColor() const {
     long r = 0,
@@ -47,7 +76,7 @@ public:
     return average_color;
   }
 
-  void SetBaseColor(const RGBApixel color) {
+  void SetBaseColor(const RGBApixel& color) {
     for (int i = 0; i < bmp_.TellWidth(); ++i) {
       for (int j = 0; j < bmp_.TellHeight(); ++j) {
         bmp_.SetPixel(i, j, color);
@@ -55,8 +84,16 @@ public:
     }
   }
 
-  void AddShape(Shape * shape) {
-    // Rasterize shape
+  void AddShape(const Triangle& shape) {
+    const BoundingBox bbox = shape.BBox();
+
+    for (int x = bbox.min.x; x < bbox.max.x; ++x) {
+      for (int y = bbox.min.y; y < bbox.max.y; ++y) {
+        if (shape.Contains(Point(x, y))) {
+          bmp_.SetPixel(x, y, shape.GetColor());
+        }
+      }
+    }
   }
 
 };
