@@ -6,25 +6,24 @@
 
 class RandomGenerator {
 private:
-  std::default_random_engine generatorX_;
-  std::uniform_int_distribution<int> distributionX_;
 
-  std::default_random_engine generatorY_;
-  std::uniform_int_distribution<int> distributionY_;
+  mutable std::default_random_engine generator_;
+  mutable std::uniform_int_distribution<int> distributionY_;
+  mutable std::uniform_int_distribution<int> distributionX_;
+
 
   int RandomX() const {
-    return distributionX_(generatorX_);
+    return distributionX_(generator_);
   }
 
   int RandomY() const {
-    return distributionY_(generatorY_);
+    return distributionY_(generator_);
   }
 public:
   RandomGenerator(const int width, const int height){
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-    std::default_random_engine generatorX_(seed);
-    std::default_random_engine generatorY_(seed);
+    generator_ = std::default_random_engine(seed);
 
     distributionX_ = std::uniform_int_distribution<int>(0, width - 1);
     distributionY_ = std::uniform_int_distribution<int>(0, height - 1);
