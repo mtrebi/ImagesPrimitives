@@ -41,6 +41,10 @@ Point::~Point(void) {}
 
 // ------------------------------------------------ assignment operator
 
+bool Point::operator==(const Point& rhs) const {
+  return this->x == rhs.x && this->y == rhs.y;
+}
+
 Point&
 Point::operator= (const Point& rhs) {
   if (this == &rhs)

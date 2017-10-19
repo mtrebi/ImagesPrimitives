@@ -25,6 +25,8 @@ public:
   Point(const Point& p);
   ~Point(void);
 
+  bool operator==(const Point& rhs) const;
+
   Point& 													// assignment operator
     operator= (const Point& p);
 
