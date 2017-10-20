@@ -1,4 +1,7 @@
 #pragma once
+#include "Image.h"
+#include "Shape.h"
+#include "../lib/EasyBMP_1.06/EasyBMP.h"
 
 static class Utils {
 public:
@@ -15,7 +18,7 @@ public:
   }
 
   // Score calculation using root-mean-square-error
-  static float Energy(const Image& target, const Image& current) const {
+  static float Energy(const Image& target, const Image& current)  {
     long long r_diff = 0,
       g_diff = 0,
       b_diff = 0;
@@ -45,8 +48,8 @@ public:
   }
 
   // Score calculation using root-mean-square-error
-  static float Energy(const Image& target, Image current, const Triangle shape) const {
-    current.AddShape(shape);
+  static float Energy(const Image& target, Image current, const Shape * shape) {
+    shape->AddToImage(current);
     return Energy(target, current);
   }
 
