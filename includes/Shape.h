@@ -37,4 +37,28 @@ public:
       }
     }
   }
+
+  void SetColor(const Image& image) {
+    const BoundingBox bbox = this->GetBBox();
+
+    long long r = 0,
+      g = 0,
+      b = 0;
+    long count = 0;
+    for (int x = bbox.min.x; x <= bbox.max.x; ++x) {
+      for (int y = bbox.min.y; y <= bbox.max.y; ++y) {
+        if (this->Contains(Point(x, y))) {
+          const RGBApixel color = image.GetPixel(x, y);
+          r += color.Red;
+          g += color.Green;
+          b += color.Blue;
+          ++count;
+        }
+      }
+    }
+
+    color_.Red = r / count;
+    color_.Green = g / count;
+    color_.Blue = b / count;
+  }
 };
