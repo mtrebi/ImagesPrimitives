@@ -1,182 +1,85 @@
 #pragma once
 #include "Image.h"
 #include "Triangle.h"
-#include "RandomGenerator.h"
+#include "ShapeGenerator.h"
+#include "ShapeMutator.h"
+#include "Utils.h"
+#include <memory>
 
 class Approximator {
 private:
-  Image image_,
+  Image current_,
         target_;
-  RandomGenerator generator_;
-  float max_score_ = 0;
 
-  // Score calculation using root-mean-square-error
-  float Score(const Image& target, const Image& current) const {
-    long long r_diff = 0,
-      g_diff = 0,
-      b_diff = 0;
-    for (int x = 0; x < target.GetWidth(); ++x) {
-      for (int y = 0; y < target.GetHeight(); ++y) {
-        const RGBApixel target_color = target.GetPixel(x, y);
-        const RGBApixel current_color = current.GetPixel(x, y);
+  float current_energy_ = 0;
 
-        // Calculate diff between target value and current value and rise to second power to dlete negatives
-        r_diff += pow((current_color.Red - target_color.Red), 2);
-        g_diff += pow((current_color.Green - target_color.Green), 2);
-        b_diff += pow((current_color.Blue - target_color.Blue), 2);
-      }
-    }
-    // Divide by the number of samples
-    r_diff /= (target.GetSize());
-    g_diff /= (target.GetSize());
-    b_diff /= (target.GetSize());
-
-    // Calculate sqrt
-    r_diff = sqrt(r_diff);
-    g_diff = sqrt(g_diff);
-    b_diff = sqrt(b_diff);
-
-    // Average between tree colors components
-    return (r_diff + g_diff + b_diff) / 3;
-  }
-
-  float Score(const Image& target, Image current, const Triangle shape) const {
-    current.AddShape(shape);
-    return Score(target, current);
-  }
- 
-  Triangle RandomShape() const {
-    // TODO More Shapes
-    Triangle triangle = Triangle(generator_.RandomPoint(), generator_.RandomPoint(), generator_.RandomPoint());
-    while (!triangle.Valid()) {
-      triangle = Triangle(generator_.RandomPoint(), generator_.RandomPoint(), generator_.RandomPoint());
-    }
-
-    triangle.SetColor(ShapeColor(triangle));
-    return triangle;
-  }
-
-  Triangle BestRandomShape() const {
-    // TODO Use numeric limits
-    Triangle best_shape = RandomShape();
-    float best_score = Score(target_, image_, best_shape);
-    //std::cout << "\tFR-Shape score: " << best_score << std::endl;
-
-    for (int i = 0; i < BEST_OF_RANDOM_SHAPES; ++i) {
-      const Triangle new_shape = RandomShape();
-      const float new_score = Score(target_, image_, new_shape);
-
-      if (new_score < best_score) {
-        best_shape = new_shape;
-        best_score = new_score;
-      }
-    }
-    //std::cout << "\tBR-Shape score: " << best_score << std::endl;
-    return best_shape;
-  }
-
-
-  Triangle Mutate(Triangle& original) const {
-    Triangle mutation = original.Mutate();
-    mutation.SetColor(ShapeColor(mutation));
-    return mutation;
-  }
-
-  RGBApixel ShapeColor(const Triangle& shape) const {
-    const BoundingBox bbox = shape.BBox();
-
-    long long r = 0,
-      g = 0,
-      b = 0;
-    long count = 0;
-    for (int x = bbox.min.x; x <= bbox.max.x; ++x) {
-      for (int y = bbox.min.y; y <= bbox.max.y; ++y) {
-        if (shape.Contains(Point(x, y))) {
-          const RGBApixel color = target_.GetPixel(x, y);
-          r += color.Red;
-          g += color.Green;
-          b += color.Blue;
-          ++count;
-        }
-      }
-    }
-
-    float area = shape.Area();
-
-    RGBApixel color;
-    color.Red = r / count;
-    color.Green = g / count;
-    color.Blue = b / count;
-
-    return color;
-  }
-
-  Triangle BestMutation(const Triangle& shape) const {
-    // TODO Use numeric limits
-    float max_score = Score(target_, image_, shape);
-    Triangle previous_mutation = shape;
-    for (int i = 0; i < N_MUTATIONS; ++i) {
-      Triangle current_mutation = Mutate(previous_mutation);
-      float new_score = Score(target_, image_, current_mutation);
-      if (new_score < max_score) {
-        previous_mutation = current_mutation;
-        max_score = new_score;
-      }
-    }
-    //std::cout << "\tM-Shape score: " << max_score << std::endl;
-    return previous_mutation;
-  }
-
-  Triangle BestHillClimbing() const {
-    // TODO Use numeric limits
-    Triangle best_shape = BestMutation(BestRandomShape());
-    float best_score = Score(target_, image_, best_shape);
-    std::cout << "\tFH-Shape score: " << best_score << std::endl;
-    for (int i = 0; i < N_HCLIMBS; ++i) {
-      Triangle new_shape = BestMutation(BestRandomShape());
-      const float new_score = Score(target_, image_, new_shape);
-
-      if (new_score < best_score) {
-        best_shape = new_shape;
-        best_score = new_score;
-      }
-    }
-    std::cout << "\tBH-Shape score: " << best_score << std::endl;
-
-    return best_shape;
-  }
+  ShapeGenerator shape_generator_;
+  ShapeMutator shape_mutator_;
 
   void Init() {
-    image_.SetBaseColor(target_.AverageColor());
+    current_.SetBaseColor(target_.AverageColor());
+    current_energy_ = Utils::Energy(target_, current_);
+  }
+
+  Image Move(float &best_energy, const Image& current) {
+    Image next = current;
+    best_energy = std::numeric_limits<float>::max();
+    std::shared_ptr<Shape> best_shape;
+    for (int i = 0; i < N_HC; ++i) { // TODO While no improvement_
+      float energy;
+      //const Shape * new_shape = shape_mutator_.Mutate(energy, shape_generator_.Generate(SHAPE_TYPE));
+      std::shared_ptr<Shape> new_shape = shape_generator_.GenerateBest(current, SHAPE_TYPE);
+      shape_mutator_.MutateBest(energy, current, new_shape);
+      if (energy < best_energy) {
+        best_shape = new_shape;
+        best_energy = energy;
+      }
+    }
+
+    best_shape->AddToImage(next);
+    return next;
   }
   // TODO Optimizacion copiar solo bounding box de pixeles
   // TODO Optimizacion bounding box score parcial
-  // TODO Threading
+  // TODO Threading by working only on a sub-part of the image
 public:
-  const int N_SHAPES = 10;
-  const int BEST_OF_RANDOM_SHAPES = 50;
-  const int N_MUTATIONS = 100;
-  const int N_HCLIMBS = 10;
+  const ShapeType SHAPE_TYPE = ShapeType::ELLIPSE;
+  const int MAX_ITERATIONS = 2000;
+  const int MIN_ENERGY = 15;
+  const int N_HC = 15;
 
   Approximator(const Image& target) :
-    image_(target.GetWidth(), target.GetHeight(), target.GetBitDepth(), target.GetHDPI(), target.GetVDPI()),
-    generator_(target.GetWidth(), target.GetHeight()),
-    target_ (target){
+    current_(target.GetWidth(), target.GetHeight(), target.GetBitDepth(), target.GetHDPI(), target.GetVDPI()),
+    target_(target),
+    shape_generator_(target_),
+    shape_mutator_(target_)
+    {
   }
 
   Image Run() {
     Init();
-    // TODO Random - restart hill climbing
-    //test();
-    for (int i = 0; i < N_SHAPES; ++i) {
-      std::cout << "Shape " << i << std::endl;
-      Triangle best_triangle = BestHillClimbing();
-      image_.AddShape(best_triangle);
-    }
-    return image_;
-  }
+    
+    auto generator = std::default_random_engine();
+    auto distribution = std::uniform_int_distribution<int>(0, 1);
+    
+    int iterations = 0;
+    while (current_energy_ > MIN_ENERGY && iterations < MAX_ITERATIONS) {
+      std::cout << "Iteration " << iterations << " - Score " << current_energy_ << std::endl;
+      float next_energy;
+      Image next = Move(next_energy, current_);
+      float delta_energy = next_energy - current_energy_;
 
-  float test(const Image& a, const Image&b) {
-    return Score(a, b);
+      if (delta_energy < 0) {
+        current_energy_ = next_energy;
+        current_ = next;
+      }
+      else if (exp(-delta_energy / iterations) > distribution(generator)){
+        current_energy_ = next_energy;
+        current_ = next;
+      }
+      
+      ++iterations;
+    }
+    return current_;
   }
 };
