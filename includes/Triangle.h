@@ -23,7 +23,6 @@ private:
     pv1_,
     pv2_;
 
-  // TODO Mutator!
   mutable std::default_random_engine generator_;
 
   mutable std::uniform_int_distribution<int> mutation_vertex_distribution_;
@@ -76,8 +75,10 @@ public:
     generator_ = std::default_random_engine(seed);
 
     mutation_vertex_distribution_ = std::uniform_int_distribution<int>(0, 2);
-    mutation_x_distribution_ = std::uniform_int_distribution<int>(-WIDTH / 2, WIDTH / 2);
-    mutation_y_distribution_ = std::uniform_int_distribution<int>(-HEIGHT / 2, HEIGHT / 2);
+    mutation_x_distribution_ = std::uniform_int_distribution<int>(-5, 5);
+    mutation_y_distribution_ = std::uniform_int_distribution<int>(-5, 5);
+    //mutation_x_distribution_ = std::uniform_int_distribution<int>(-WIDTH / 2, WIDTH / 2);
+    //mutation_y_distribution_ = std::uniform_int_distribution<int>(-HEIGHT / 2, HEIGHT / 2);
   }
 
 
