@@ -2,6 +2,7 @@
 #include "RandomGenerator.h"
 #include "Image.h"
 #include "Ellipse.h"
+#include <memory>
 
 enum class ShapeType {
   TRIANGLE,
@@ -13,15 +14,15 @@ private:
   Image target_;
   RandomGenerator generator_;
 
-  Triangle * GenerateTriangle() const {
-    return new Triangle(generator_.RandomPoint(), generator_.RandomPoint(), generator_.RandomPoint());
+  std::shared_ptr<Shape> GenerateTriangle() const {
+    return std::shared_ptr<Shape>(new Triangle(generator_.RandomPoint(), generator_.RandomPoint(), generator_.RandomPoint()));
   }
 
-  Ellipse * GenerateEllipse() const {
-    return new Ellipse(generator_.RandomPoint(), generator_.RandomX(), generator_.RandomY());
+  std::shared_ptr<Shape> GenerateEllipse() const {
+    return std::shared_ptr<Shape>(new Ellipse(generator_.RandomPoint(), generator_.RandomX(), generator_.RandomY()));
   }
 
-  Shape * ShapeConstructor(const ShapeType type) const {
+  std::shared_ptr<Shape> ShapeConstructor(const ShapeType type) const {
     switch (type) {
     case ShapeType::TRIANGLE:
       return GenerateTriangle();
@@ -39,25 +40,23 @@ public:
 
   }
 
-  Shape * Generate(const ShapeType type) const {
-    Shape * shape = ShapeConstructor(type);
+  std::shared_ptr<Shape> Generate(const ShapeType type) const {
+    std::shared_ptr<Shape> shape = ShapeConstructor(type);
     while (!shape->Valid()) {
-      delete shape;
       shape = ShapeConstructor(type);
     }
     shape->SetColor(target_);
     return shape;
   }
 
-  Shape * GenerateBest(const Image& current, const ShapeType type) const {
+  std::shared_ptr<Shape> GenerateBest(const Image& current, const ShapeType type) const {
     float best_energy = std::numeric_limits<float>::max();
-    Shape * best_shape = nullptr;
+    std::shared_ptr<Shape> best_shape = nullptr;
     for (int i = 0; i < RANDOM_BEST; ++i) {
-      Shape * new_shape = Generate(type);
+      std::shared_ptr<Shape> new_shape = Generate(type);
       const float new_energy = Utils::Energy(target_, current, new_shape);
 
       if (new_energy < best_energy) {
-        if (best_shape) delete best_shape;
         best_shape = new_shape;
         best_energy = new_energy;
       }

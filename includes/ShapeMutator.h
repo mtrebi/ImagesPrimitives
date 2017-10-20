@@ -13,27 +13,24 @@ public:
 
   }
 
-  Shape * Mutate(const Shape * original) {
-    Shape * mutation = original->Mutate();
-    mutation->SetColor(target_);
-    return mutation;
+  void Mutate(std::shared_ptr<Shape> original) {
+    original->Mutate();
+    original->SetColor(target_);
   }
 
-  const Shape * MutateBest(float& best_energy, const Image& current, const Shape * original) {
+  void MutateBest(float& best_energy, const Image& current, std::shared_ptr<Shape> shape) {
     best_energy = std::numeric_limits<float>::max();
-    const Shape * best_shape = original;
 
     for (int i = 0; i < MUTATIONS; ++i) {
-      Shape * new_mutation = Mutate(best_shape);
+      Mutate(shape);
 
-      float new_energy = Utils::Energy(target_, current, new_mutation);
+      float new_energy = Utils::Energy(target_, current, shape);
       if (new_energy < best_energy) {
-        if (best_shape && best_shape != original) delete best_shape;
-        best_shape = new_mutation;
         best_energy = new_energy;
       }
-    }
-
-    return best_shape;
+      else {
+        shape->Rollback();
+      }
+    };
   }
 };

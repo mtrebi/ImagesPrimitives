@@ -15,8 +15,8 @@ extern int HEIGHT;
 
 class Ellipse : public Shape {
 private:
-  Point c_;
-  int rx_, ry_;
+  Point c_, pc_;
+  int rx_, prx_, ry_, pry_;
 
   // TODO Mutator!
   mutable std::default_random_engine generator_;
@@ -56,7 +56,9 @@ public:
   }
 
   Ellipse(const Point& c, const int rx, const int ry)
-    : c_(c), rx_(rx), ry_(ry) {
+    : c_(c), rx_(rx), ry_(ry),
+     pc_(c), prx_(rx), pry_(ry)
+  {
 
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
@@ -88,24 +90,40 @@ public:
     return bbox;
   }
 
-  Shape* Mutate() const {
-    Shape * ellipse = nullptr;
-    while (!ellipse || !ellipse->Valid()) {
+  void Mutate() {
+    while (true) {
+      this->pc_ = this->c_;
+      this->prx_ = this->rx_;
+      this->pry_ = this->ry_;
+      
       const int random_vertex = mutation_attr_distribution_(generator_);
+
       switch (random_vertex) {
       case 0:
-        ellipse = new Ellipse(CenterMutation(), this->rx_, this->ry_);
+        this->c_ = CenterMutation();
         break;
       case 1:
-        ellipse = new Ellipse(c_, RadiusXMutation(), this->ry_);
+        this->rx_ = RadiusXMutation();
         break;
       case 2:
-        ellipse = new Ellipse(c_, this->rx_, RadiusYMutation());
+        this->ry_ = RadiusYMutation();
         break;
       default:
         throw std::invalid_argument("rand is out of boundaries");
       }
+
+      if (!Valid()) {
+        Rollback();
+      }
+      else {
+        break;
+      }
     }
-    return ellipse;
+  }
+
+  void Rollback() override {
+    this->c_ = this->pc_;
+    this->rx_ = this->prx_;
+    this->ry_ = this->pry_;
   }
 };

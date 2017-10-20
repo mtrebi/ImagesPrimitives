@@ -24,7 +24,8 @@ public:
   virtual bool Contains(const Point& point) const = 0;
   virtual bool Valid() const = 0;
   virtual BoundingBox GetBBox() const = 0;
-  virtual Shape * Mutate() const = 0;
+  virtual void Mutate() = 0;
+  virtual void Rollback() = 0;
 
   void AddToImage(Image& image) const {
     const BoundingBox bbox = this->GetBBox();

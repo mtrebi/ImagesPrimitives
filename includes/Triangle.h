@@ -16,9 +16,12 @@ extern int HEIGHT;
 
 class Triangle : public Shape {
 private:
-  Point v0_, 
-        v1_,
-        v2_;
+  Point v0_,
+    v1_,
+    v2_,
+    pv0_,
+    pv1_,
+    pv2_;
 
   // TODO Mutator!
   mutable std::default_random_engine generator_;
@@ -63,7 +66,10 @@ public:
   }
 
   Triangle(const Point& v1, const Point& v2, const Point& v3)
-    : v0_(v1), v1_(v2), v2_(v3) {
+    : v0_(v1), v1_(v2), v2_(v3),
+    pv0_(v1), pv1_(v2), pv2_(v3)
+  
+  {
 
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
@@ -107,25 +113,33 @@ public:
     return bbox;
   }
 
-  Shape* Mutate() const {
-    //Triangle must be valid!
-    Shape * triangle = nullptr;
-    while (!triangle || !triangle->Valid()) {
+  void Mutate() {
+    while (!Valid()) {
+      Rollback();
+      this->pv0_ = this->v0_;
+      this->pv1_ = this->v1_;
+      this->pv2_ = this->v2_;
+
       const int random_vertex = mutation_vertex_distribution_(generator_);
       switch (random_vertex) {
       case 0:
-        triangle = new Triangle(VertexMutation(v0_), v1_, v2_);
+        v0_ = VertexMutation(v0_);
         break;
       case 1:
-        triangle = new Triangle(v0_, VertexMutation(v1_), v2_);
+        v1_ = VertexMutation(v1_);
         break;
       case 2:
-        triangle = new Triangle(v0_, v1_, VertexMutation(v2_));
+        v2_ = VertexMutation(v2_);
         break;
       default:
         throw std::invalid_argument("rand is out of boundaries");
       }
     }
-    return triangle;
+  }
+
+  void Rollback() {
+    v0_ = pv0_;
+    v1_ = pv1_;
+    v2_ = pv2_;
   }
 };

@@ -2,6 +2,7 @@
 #include "Image.h"
 #include "Shape.h"
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
+#include <memory>
 
 static class Utils {
 public:
@@ -48,7 +49,7 @@ public:
   }
 
   // Score calculation using root-mean-square-error
-  static float Energy(const Image& target, Image current, const Shape * shape) {
+  static float Energy(const Image& target, Image current, const std::shared_ptr<Shape> shape) {
     shape->AddToImage(current);
     return Energy(target, current);
   }
