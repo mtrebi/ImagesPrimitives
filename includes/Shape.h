@@ -1,7 +1,6 @@
 #pragma once
 #include <limits>
-#include "Point.h"
-
+#include "Image.h"
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
 
 struct BoundingBox {

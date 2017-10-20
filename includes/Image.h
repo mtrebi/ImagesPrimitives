@@ -1,7 +1,5 @@
 #pragma once
-#include "Triangle.h"
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
-
 
 class Image {
 private:
