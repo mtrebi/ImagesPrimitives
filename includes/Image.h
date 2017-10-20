@@ -83,17 +83,4 @@ public:
       }
     }
   }
-
-  void AddShape(const Triangle& shape) {
-    const BoundingBox bbox = shape.BBox();
-
-    for (int x = bbox.min.x; x < bbox.max.x; ++x) {
-      for (int y = bbox.min.y; y < bbox.max.y; ++y) {
-        if (shape.Contains(Point(x, y))) {
-          bmp_.SetPixel(x, y, shape.GetColor());
-        }
-      }
-    }
-  }
-
 };
