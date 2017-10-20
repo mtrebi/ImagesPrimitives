@@ -114,8 +114,7 @@ public:
   }
 
   void Mutate() {
-    while (!Valid()) {
-      Rollback();
+    while (true) {
       this->pv0_ = this->v0_;
       this->pv1_ = this->v1_;
       this->pv2_ = this->v2_;
@@ -134,6 +133,13 @@ public:
       default:
         throw std::invalid_argument("rand is out of boundaries");
       }
+      if (!Valid()) {
+        Rollback();
+      }
+      else {
+        break;
+      }
+
     }
   }
 
