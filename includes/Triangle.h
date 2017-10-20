@@ -110,7 +110,7 @@ public:
   Shape* Mutate() const {
     //Triangle must be valid!
     Shape * triangle = nullptr;
-    while (triangle && !triangle->Valid()) {
+    while (!triangle || !triangle->Valid()) {
       const int random_vertex = mutation_vertex_distribution_(generator_);
       switch (random_vertex) {
       case 0:
