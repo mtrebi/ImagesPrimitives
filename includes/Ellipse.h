@@ -18,7 +18,6 @@ private:
   Point c_, pc_;
   int rx_, prx_, ry_, pry_;
 
-  // TODO Mutator!
   mutable std::default_random_engine generator_;
 
   mutable std::uniform_int_distribution<int> mutation_attr_distribution_;
