@@ -16,11 +16,11 @@ public:
   }
   
   Image(const Image& image) {
-    bmp_ = BMP(image.bmp_);
+    bmp_ = image.bmp_;
   }
 
   Image& operator=(const Image& image)  {
-    bmp_ = BMP(image.bmp_);
+    bmp_ = image.bmp_;
     return *this;
   }
 
@@ -31,7 +31,6 @@ public:
 
   Image& operator=(Image&& image) {
     bmp_ = std::move(image.bmp_);
-    int a = 2;
     return *this;
   }
 
