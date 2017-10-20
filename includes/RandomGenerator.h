@@ -11,14 +11,6 @@ private:
   mutable std::uniform_int_distribution<int> distributionY_;
   mutable std::uniform_int_distribution<int> distributionX_;
 
-
-  int RandomX() const {
-    return distributionX_(generator_);
-  }
-
-  int RandomY() const {
-    return distributionY_(generator_);
-  }
 public:
   RandomGenerator(const int width, const int height){
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -27,6 +19,14 @@ public:
 
     distributionX_ = std::uniform_int_distribution<int>(0, width - 1);
     distributionY_ = std::uniform_int_distribution<int>(0, height - 1);
+  }
+
+  int RandomX() const {
+    return distributionX_(generator_);
+  }
+
+  int RandomY() const {
+    return distributionY_(generator_);
   }
 
   Point RandomPoint() const {
