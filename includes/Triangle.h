@@ -5,31 +5,22 @@
 #include "Vector.h"
 #include "Point.h"
 #include "Utils.h"
+#include "Shape.h"
 
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
 
 extern int WIDTH;
 extern int HEIGHT;
 
-struct BoundingBox {
-  Point min, max;
 
-  BoundingBox()
-    : min(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()),
-      max(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()) {
-  }
-};
 
-class Triangle {
+class Triangle : public Shape {
 private:
   Point v0_, 
         v1_,
         v2_;
 
-  RGBApixel color_;
-
-  BoundingBox bbox_;
-
+  // TODO Mutator!
   mutable std::default_random_engine generator_;
 
   mutable std::uniform_int_distribution<int> mutation_vertex_distribution_;
@@ -49,24 +40,8 @@ private:
     u = 1.0f - v - w;
   }
 
-  void SetBBox() {
-    std::array<Point, 3> vertices{ this->v0_, this->v1_, this->v2_ };
-
-    for (auto& vertex : vertices) {
-      if (vertex.x < bbox_.min.x) {
-        bbox_.min.x = vertex.x;
-      }
-      if (vertex.y < bbox_.min.y) {
-        bbox_.min.y = vertex.y;
-      }
-
-      if (vertex.x > bbox_.max.x) {
-        bbox_.max.x = vertex.x;
-      }
-      if (vertex.y > bbox_.max.y) {
-        bbox_.max.y = vertex.y;
-      }
-    }
+  float Area() const {
+    return abs(((v1_.x - v0_.x) * (v2_.y - v0_.y)) - (v1_.y - v0_.y) * (v2_.x - v0_.x));
   }
 
   Point VertexMutation(const Point& vertex) const {
@@ -83,9 +58,10 @@ private:
 
 public:
   Triangle() : 
-    v0_(Point()), v1_(Point()), v2_(Point()) {
-    
+    v0_(Point()), v1_(Point()), v2_(Point()) { 
+  
   }
+
   Triangle(const Point& v1, const Point& v2, const Point& v3)
     : v0_(v1), v1_(v2), v2_(v3) {
 
@@ -96,45 +72,55 @@ public:
     mutation_vertex_distribution_ = std::uniform_int_distribution<int>(0, 2);
     mutation_x_distribution_ = std::uniform_int_distribution<int>(-WIDTH / 2, WIDTH / 2);
     mutation_y_distribution_ = std::uniform_int_distribution<int>(-HEIGHT / 2, HEIGHT / 2);
-
-    SetBBox();
   }
 
-  RGBApixel GetColor() const { return color_; }
-  void SetColor(const RGBApixel& color) { color_ = color; }
 
-  BoundingBox BBox() const {
-    return bbox_;
-  }
-
-  bool Contains(const Point& point) const {
+  virtual bool Contains(const Point& point) const override{
     double u, v, w;
     BarycentricCoords(u, v, w, point);
     return (u >= 0 && v >= 0 && u + v <= 1.0);
   }
 
-  bool Valid() const {
+  virtual bool Valid() const override {
     return Area() != 0;
   }
 
-  float Area() const {
-    return abs(((v1_.x - v0_.x) * (v2_.y - v0_.y)) - (v1_.y - v0_.y) * (v2_.x - v0_.x));
+  virtual BoundingBox GetBBox() const override {
+    BoundingBox bbox;
+    std::array<Point, 3> vertices{ this->v0_, this->v1_, this->v2_ };
+
+    for (auto& vertex : vertices) {
+      if (vertex.x < bbox.min.x) {
+        bbox.min.x = vertex.x;
+      }
+      if (vertex.y < bbox.min.y) {
+        bbox.min.y = vertex.y;
+      }
+
+      if (vertex.x > bbox.max.x) {
+        bbox.max.x = vertex.x;
+      }
+      if (vertex.y > bbox.max.y) {
+        bbox.max.y = vertex.y;
+      }
+    }
+    return bbox;
   }
 
-  Triangle Mutate() const {
+  Shape* Mutate() const {
     //Triangle must be valid!
-    Triangle triangle;
-    while (!triangle.Valid()) {
+    Shape * triangle = nullptr;
+    while (triangle && !triangle->Valid()) {
       const int random_vertex = mutation_vertex_distribution_(generator_);
       switch (random_vertex) {
       case 0:
-        triangle = Triangle(VertexMutation(v0_), v1_, v2_);
+        triangle = new Triangle(VertexMutation(v0_), v1_, v2_);
         break;
       case 1:
-        triangle = Triangle(v0_, VertexMutation(v1_), v2_);
+        triangle = new Triangle(v0_, VertexMutation(v1_), v2_);
         break;
       case 2:
-        triangle = Triangle(v0_, v1_, VertexMutation(v2_));
+        triangle = new Triangle(v0_, v1_, VertexMutation(v2_));
         break;
       default:
         throw std::invalid_argument("rand is out of boundaries");
