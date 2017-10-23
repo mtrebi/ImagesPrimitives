@@ -25,14 +25,19 @@ private:
   }
 
   std::shared_ptr<Shape> ShapeConstructor(const ShapeType type) const {
+    std::shared_ptr<Shape> shape;
     switch (type) {
     case ShapeType::TRIANGLE:
-      return GenerateTriangle();
+      shape = GenerateTriangle();
+      break;
     case ShapeType::ELLIPSE:
-      return GenerateEllipse();
+      shape = GenerateEllipse();
+      break;
     default:
-      return nullptr;
+      shape =  nullptr;
     }
+    shape->SetSize(target_.GetWidth(), target_.GetHeight());
+    return shape;
   }
 
   std::shared_ptr<Shape> Generate(const ShapeType type, const Image& current) const {
