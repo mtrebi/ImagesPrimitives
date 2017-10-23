@@ -15,10 +15,12 @@ private:
   RandomGenerator generator_;
 
   std::shared_ptr<Shape> GenerateTriangle() const {
+    // TODO RandomPoint between start, end and height
     return std::shared_ptr<Shape>(new Triangle(generator_.RandomPoint(), generator_.RandomPoint(), generator_.RandomPoint()));
   }
 
   std::shared_ptr<Shape> GenerateEllipse() const {
+    // TODO RandomPoint between start, end and height
     return std::shared_ptr<Shape>(new Ellipse(generator_.RandomPoint(), generator_.RandomX(), generator_.RandomY()));
   }
 
@@ -33,10 +35,11 @@ private:
     }
   }
 public:
-  const int RANDOM_BEST = 15;
+  const int RANDOM_BEST = 10;
+
 
   ShapeGenerator(const Image& image)
-    : target_(image), generator_(target_.GetWidth(), target_.GetHeight()) {
+    : target_(image), generator_(target_.GetHeight(), target_.GetWidth()) {
 
   }
 
