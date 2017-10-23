@@ -13,6 +13,7 @@ include_directories (
 
 set(SOURCES src/Point.cpp
 			src/Vector.cpp
+			src/Shape.cpp
 			src/main.cpp)
 
 add_compile_options(
