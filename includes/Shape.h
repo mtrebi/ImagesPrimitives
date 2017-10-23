@@ -34,5 +34,5 @@ public:
   virtual void Mutate() = 0;
   virtual void Rollback() = 0;
 
-  void SetColor(const Image& target, const Image& current, int alpha); 
+  void SetColor(const Image& target, const Image& current, const int alpha); 
 };

@@ -1,7 +1,7 @@
 #include "Shape.h"
 #include "Utils.h"
 
-void Shape::SetColor(const Image& target, const Image& current, int alpha = 128) {
+void Shape::SetColor(const Image& target, const Image& current, const int alpha) {
   const BoundingBox bbox = this->GetBBox();
   long long total_red = 0,
     total_green = 0,
@@ -24,9 +24,9 @@ void Shape::SetColor(const Image& target, const Image& current, int alpha = 128)
       }
     }
   }
-  
-  color_.Red = Utils::Clamp(total_red / count, 0, 255);
-  color_.Green = Utils::Clamp(total_green / count, 0, 255);
-  color_.Blue = Utils::Clamp(total_blue / count, 0, 255);
+
+  color_.Red = Utils::Clamp((total_red / count) >> 8, 0, 255);
+  color_.Green = Utils::Clamp((total_green / count) >> 8, 0, 255);
+  color_.Blue = Utils::Clamp((total_blue / count) >> 8, 0, 255);
   color_.Alpha = alpha;
 }
