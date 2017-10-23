@@ -55,15 +55,14 @@ private:
 
 public:
   Triangle() : 
-    v0_(Point()), v1_(Point()), v2_(Point()) { 
+    Shape(0,0), v0_(Point()), v1_(Point()), v2_(Point()) { 
   
   }
 
-  Triangle(const Point& v1, const Point& v2, const Point& v3)
-    : v0_(v1), v1_(v2), v2_(v3),
-    pv0_(v1), pv1_(v2), pv2_(v3)
-  
-  {
+  Triangle(const Point& v1, const Point& v2, const Point& v3, const int width, const int height)
+    : Shape(width, height),
+    v0_(v1), v1_(v2), v2_(v3),
+    pv0_(v1), pv1_(v2), pv2_(v3) {
 
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
@@ -72,8 +71,6 @@ public:
     mutation_vertex_distribution_ = std::uniform_int_distribution<int>(0, 2);
     mutation_x_distribution_ = std::uniform_int_distribution<int>(-5, 5);
     mutation_y_distribution_ = std::uniform_int_distribution<int>(-5, 5);
-    //mutation_x_distribution_ = std::uniform_int_distribution<int>(-WIDTH / 2, WIDTH / 2);
-    //mutation_y_distribution_ = std::uniform_int_distribution<int>(-HEIGHT / 2, HEIGHT / 2);
   }
 
 

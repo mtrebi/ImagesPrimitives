@@ -47,12 +47,13 @@ private:
 
 public:
   Ellipse() :
-    c_(Point()), rx_(0), ry_(0) {
+    Shape(0,0), c_(Point()), rx_(0), ry_(0) {
 
   }
 
-  Ellipse(const Point& c, const int rx, const int ry)
-    : c_(c), rx_(rx), ry_(ry),
+  Ellipse(const Point& c, const int rx, const int ry, const int width, const int height)
+    : Shape(width, height),
+    c_(c), rx_(rx), ry_(ry),
      pc_(c), prx_(rx), pry_(ry)
   {
 

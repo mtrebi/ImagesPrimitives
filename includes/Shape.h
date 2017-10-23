@@ -19,10 +19,9 @@ protected:
 private:
   RGBApixel color_;
 public:
+  Shape(const int width, const int height)
+    : max_height_(height), max_width_(width) {
 
-  void SetSize(const int width, const int height) {
-    max_height_ = height;
-    max_width_ = width;
   }
 
   RGBApixel GetColor() const { return color_; }
