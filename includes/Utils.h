@@ -20,11 +20,7 @@ public:
 
   // Score calculation using root-mean-square-error
   static float Energy(const Image& target, const Image& current)  {
-    long long r_diff = 0,
-      g_diff = 0,
-      b_diff = 0,
-      a_diff = 0,
-      total_diff = 0;
+    long long total_diff = 0;
 
     for (int x = 0; x < target.GetWidth(); ++x) {
       for (int y = 0; y < target.GetHeight(); ++y) {
@@ -32,12 +28,15 @@ public:
         const RGBApixel current_color = current.GetPixel(x, y);
 
         // Calculate diff between target value and current value and rise to second power to dlete negatives
-        r_diff += pow((current_color.Red - target_color.Red), 2);
-        g_diff += pow((current_color.Green - target_color.Green), 2);
-        b_diff += pow((current_color.Blue - target_color.Blue), 2);
-        a_diff += pow((current_color.Alpha - target_color.Alpha), 2);
+        const long long r_diff = (current_color.Red - target_color.Red);
+        const long long g_diff = (current_color.Green - target_color.Green);
+        const long long b_diff = (current_color.Blue - target_color.Blue);
+        const long long a_diff = (current_color.Alpha - target_color.Alpha);
 
-        total_diff += r_diff + g_diff + b_diff + a_diff;
+        total_diff += r_diff * r_diff + 
+                      g_diff * g_diff + 
+                      b_diff * b_diff + 
+                      a_diff * a_diff;
       }
     }
 
