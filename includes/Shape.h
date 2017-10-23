@@ -13,10 +13,16 @@ struct BoundingBox {
 };
 
 class Shape {
+protected:
+  int max_height_, max_width_;
 private:
   RGBApixel color_;
-
 public:
+
+  void SetSize(const int width, const int height) {
+    max_height_ = height;
+    max_width_ = width;
+  }
 
   RGBApixel GetColor() const { return color_; }
   void SetColor(const RGBApixel& color) { color_ = color; }
@@ -40,7 +46,10 @@ public:
 
   void SetColor(const Image& image) {
     const BoundingBox bbox = this->GetBBox();
-
+    //const alpha = 
+    // TODO Alpha Shit
+    // Try default alpha value 128
+    // Try combination of prev value + new color
     long long r = 0,
       g = 0,
       b = 0;
@@ -60,5 +69,6 @@ public:
     color_.Red = r / count;
     color_.Green = g / count;
     color_.Blue = b / count;
+    color_.Alpha = 128;
   }
 };

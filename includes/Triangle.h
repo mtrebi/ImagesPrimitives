@@ -9,11 +9,6 @@
 
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
 
-extern int WIDTH;
-extern int HEIGHT;
-
-
-
 class Triangle : public Shape {
 private:
   Point v0_,
@@ -51,8 +46,8 @@ private:
       ry = mutation_y_distribution_(generator_);
     
     const Point mutated = Point(
-      Utils::Clamp(vertex.x + rx, 0, WIDTH - 1),
-      Utils::Clamp(vertex.y + ry, 0, HEIGHT - 1)
+      Utils::Clamp(vertex.x + rx, 0, max_width_ - 1),
+      Utils::Clamp(vertex.y + ry, 0, max_height_ - 1)
     );
 
     return mutated;

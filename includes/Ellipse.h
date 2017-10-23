@@ -10,9 +10,6 @@
 
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
 
-extern int WIDTH;
-extern int HEIGHT;
-
 class Ellipse : public Shape {
 private:
   Point c_, pc_;
@@ -29,8 +26,8 @@ private:
         ry = mutation_y_distribution_(generator_);
 
     const Point mutated = Point(
-      Utils::Clamp(c_.x + rx, 0, WIDTH - 1),
-      Utils::Clamp(c_.y + ry, 0, HEIGHT - 1)
+      Utils::Clamp(c_.x + rx, 0, max_width_ - 1),
+      Utils::Clamp(c_.y + ry, 0, max_height_ - 1)
     );
 
     return mutated;
@@ -38,13 +35,13 @@ private:
 
   int RadiusXMutation() const {
     const int mutation = mutation_x_distribution_(generator_);
-    const int mutation_clamped = Utils::Clamp(mutation + rx_, 0, WIDTH - 1);
+    const int mutation_clamped = Utils::Clamp(mutation + rx_, 0, max_width_ - 1);
     return mutation_clamped;
   }
 
   int RadiusYMutation() const {
     const int mutation = mutation_y_distribution_(generator_);
-    const int mutation_clamped = Utils::Clamp(mutation + rx_, 0, HEIGHT - 1);
+    const int mutation_clamped = Utils::Clamp(mutation + rx_, 0, max_height_ - 1);
     return mutation_clamped;
   }
 
@@ -64,8 +61,8 @@ public:
     generator_ = std::default_random_engine(seed);
 
     mutation_attr_distribution_ = std::uniform_int_distribution<int>(0, 2);
-    mutation_x_distribution_ = std::uniform_int_distribution<int>(-WIDTH / 2, WIDTH / 2);
-    mutation_y_distribution_ = std::uniform_int_distribution<int>(-HEIGHT / 2, HEIGHT / 2);
+    mutation_x_distribution_ = std::uniform_int_distribution<int>(-max_width_ / 2, max_width_ / 2);
+    mutation_y_distribution_ = std::uniform_int_distribution<int>(-max_height_ / 2, max_height_ / 2);
   }
 
 
@@ -76,10 +73,10 @@ public:
   virtual bool Valid() const override {
     BoundingBox bbox = GetBBox();
     return rx_ > 0 && ry_ > 0 &&
-      (bbox.min.x >= 0 && bbox.min.x <= WIDTH - 1) &&
-      (bbox.min.y >= 0 && bbox.min.y <= HEIGHT - 1) &&
-      (bbox.max.x >= 0 && bbox.max.x <= WIDTH - 1) &&
-      (bbox.max.y >= 0 && bbox.max.y <= HEIGHT - 1);
+      (bbox.min.x >= 0 && bbox.min.x <= max_width_ - 1) &&
+      (bbox.min.y >= 0 && bbox.min.y <= max_height_ - 1) &&
+      (bbox.max.x >= 0 && bbox.max.x <= max_width_ - 1) &&
+      (bbox.max.y >= 0 && bbox.max.y <= max_height_ - 1);
   }
 
   virtual BoundingBox GetBBox() const override {
