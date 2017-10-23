@@ -60,7 +60,7 @@ private:
       }
     }
     return best_shape;
-  
+  }
   // TODO Optimize score differencePartial
   // TODO Aliasing
 public:
