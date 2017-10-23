@@ -1,5 +1,7 @@
 #pragma once
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
+#include <memory>
+#include "Shape.h"
 
 class Image {
 private:
@@ -80,4 +82,16 @@ public:
       }
     }
   }
+
+  void AddShape(const std::shared_ptr<Shape> shape) {
+    const BoundingBox bbox = shape->GetBBox();
+    for (int x = bbox.min.x; x < bbox.max.x; ++x) {
+      for (int y = bbox.min.y; y < bbox.max.y; ++y) {
+        if (shape->Contains(Point(x, y))) {
+          this->SetPixel(x, y, shape->GetColor());
+        }
+      }
+    }
+  }
+
 };

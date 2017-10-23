@@ -1,6 +1,6 @@
 #pragma once
 #include "Image.h"
-#include "Shape.h"
+class Shape;
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
 #include <memory>
 
@@ -46,7 +46,7 @@ public:
 
   // Score calculation using root-mean-square-error
   static float Energy(const Image& target, Image current, const std::shared_ptr<Shape> shape) {
-    shape->AddToImage(current);
+    current.AddShape(shape);
     return Energy(target, current);
   }
 
