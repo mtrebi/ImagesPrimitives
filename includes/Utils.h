@@ -46,7 +46,8 @@ public:
   // Score calculation using root-mean-square-error
   static float Energy(const Image& target, Image current, const std::shared_ptr<Shape> shape) {
     current.AddShape(shape);
-    return Energy(target, current);
+    shape->SetEnergy(Energy(target, current));
+    return shape->GetEnergy();
   }
 
 };

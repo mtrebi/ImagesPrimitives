@@ -20,15 +20,14 @@ public:
 
   }
 
-  void MutateBest(float& best_energy, const Image& current, std::shared_ptr<Shape> shape) {
-    best_energy = std::numeric_limits<float>::max();
-
+  void MutateBest(const Image& current, std::shared_ptr<Shape> shape) {
+    float best_energy = std::numeric_limits<float>::max();
     for (int i = 0; i < MUTATIONS; ++i) {
       Mutate(shape, current);
 
-      float new_energy = Utils::Energy(target_, current, shape);
-      if (new_energy < best_energy) {
-        best_energy = new_energy;
+      Utils::Energy(target_, current, shape);
+      if (shape->GetEnergy() < best_energy) {
+        best_energy = shape->GetEnergy();
       }
       else {
         shape->Rollback();

@@ -22,10 +22,43 @@ private:
   void Init() {
     current_.SetBaseColor(target_.AverageColor());
     current_energy_ = Utils::Energy(target_, current_);
-    // TODO thread_pool_.init();
+    thread_pool_.init();
   }
 
+  
+  /*
+  std::shared_ptr<Shape> HillClimber(const Image& current) {
+    float energy;
+    std::shared_ptr<Shape> new_shape = shape_generator_.GenerateBest(current, SHAPE_TYPE);
+    shape_mutator_.MutateBest(energy, current, new_shape);
+  }*/
+
+  /*
   Image Move(float &best_energy, const Image& current) {
+    std::shared_ptr<Shape> best_shape;
+    std::future<std::shared_ptr<Shape>> results[N_HC];
+    best_energy = std::numeric_limits<float>::max();
+
+    for (int i = 0; i < N_HC; ++i) {
+      //float energy_ref;
+      //auto f = thread_pool_.submit(HillClimber, std::ref(energy_ref));
+      //results[i].future = f;
+      //results[i].energy = energy_ref;
+    }
+
+    for (int i = 0; i < N_HC; ++i) {
+      if (results[i].valid()) {
+        std::shared_ptr<Shape> shape = results[i].get();
+        // Get Shape Energy
+        if (shape_energy < best_energy) {
+          best_shape = shape;
+          best_energy = shape_energy;
+        }
+
+      }
+
+    }
+
     Image next = current;
     best_energy = std::numeric_limits<float>::max();
     std::shared_ptr<Shape> best_shape;
@@ -41,16 +74,28 @@ private:
     next.AddShape(best_shape);
     return next;
   }
-  // TODO Optimizacion copiar solo bounding box de pixeles
-  // TODO Optimizacion bounding box score parcial
-  // TODO Threading by working only on a sub-part of the image
+  */
+  
+  std::shared_ptr<Shape> Move(const Image& current) {
+    std::shared_ptr<Shape> best_shape;
+    for (int i = 0; i < N_HC; ++i) {
+      std::shared_ptr<Shape> new_shape = shape_generator_.GenerateBest(current, SHAPE_TYPE);
+      shape_mutator_.MutateBest(current, new_shape);
+      if (!best_shape || new_shape->GetEnergy() < best_shape->GetEnergy()) {
+        best_shape = new_shape;
+      }
+    }
+    return best_shape;
+  }
+  // TODO Optimize score differencePartial
+  // TODO Aliasing
 public:
   static const ShapeType SHAPE_TYPE = ShapeType::TRIANGLE;
-  static const int MAX_ITERATIONS = 2000;
-  static const int MIN_ENERGY = 3;
+  static const int MAX_ITERATIONS = 50;
+  const float MIN_ENERGY = 0.025f;
   static const int N_HC = 15;
   static const int ALPHA = 128;
-  static const int THREADS = 8;
+  static const int N_THREADS = 1;
 
   Approximator(const Image& target) :
     current_(target.GetWidth(), target.GetHeight(), target.GetBitDepth(), target.GetHDPI(), target.GetVDPI()),
@@ -69,21 +114,25 @@ public:
     int iterations = MAX_ITERATIONS;
     while (current_energy_ > MIN_ENERGY && iterations > 0) {
       std::cout << "Iteration " << MAX_ITERATIONS - iterations << " - Score " << current_energy_ << std::endl;
-      float next_energy;
-      Image next = Move(next_energy, current_);
-      float delta_energy = next_energy - current_energy_;
 
+      std::shared_ptr<Shape> new_shape = Move(current_); 
+
+      if (!new_shape) {
+        continue;
+      }
+
+      const float delta_energy = new_shape->GetEnergy() - current_energy_;
       if (delta_energy < 0) {
-        current_energy_ = next_energy;
-        current_ = next;
+        current_energy_ = new_shape->GetEnergy();
+        current_.AddShape(new_shape);
         --iterations;
-      }/*
+      }
       else if (exp(-delta_energy / iterations) > distribution(generator)){
-        current_energy_ = next_energy;
-        current_ = next;
-      }*/
-      
-      return current_;
+        current_energy_ = new_shape->GetEnergy();
+        current_.AddShape(new_shape);
+        --iterations;
+      }
     }
+    return current_;
   }
 };

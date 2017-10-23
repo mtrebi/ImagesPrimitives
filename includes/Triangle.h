@@ -136,7 +136,8 @@ public:
     }
   }
 
-  void Rollback() {
+  void Rollback() override {
+    Shape::Rollback();
     v0_ = pv0_;
     v1_ = pv1_;
     v2_ = pv2_;

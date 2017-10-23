@@ -18,10 +18,19 @@ protected:
   int max_height_, max_width_;
 private:
   RGBApixel color_;
+  float energy_ = std::numeric_limits<float>::max(),
+    penergy_ = std::numeric_limits<float>::max();
+
 public:
   Shape(const int width, const int height)
     : max_height_(height), max_width_(width) {
 
+  }
+
+  float GetEnergy() const { return energy_; }
+  void SetEnergy(const float energy) { 
+    penergy_ = energy_;
+    energy_ = energy; 
   }
 
   RGBApixel GetColor() const { return color_; }
@@ -31,7 +40,9 @@ public:
   virtual bool Valid() const = 0;
   virtual BoundingBox GetBBox() const = 0;
   virtual void Mutate() = 0;
-  virtual void Rollback() = 0;
+  virtual void Rollback() {
+    energy_ = penergy_;
+  }
 
   void SetColor(const Image& target, const Image& current, const int alpha); 
 };

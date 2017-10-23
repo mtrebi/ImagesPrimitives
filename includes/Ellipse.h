@@ -119,6 +119,7 @@ public:
   }
 
   void Rollback() override {
+    Shape::Rollback();
     this->c_ = this->pc_;
     this->rx_ = this->prx_;
     this->ry_ = this->pry_;
