@@ -41,7 +41,7 @@ public:
       }
     }
 
-    return sqrt(total_diff / (target.GetSize() * 4) / 255);
+    return sqrt(total_diff / (target.GetSize() * 4)) / 255;
   }
 
   // Score calculation using root-mean-square-error
