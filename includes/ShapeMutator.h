@@ -9,7 +9,7 @@ private:
 private:
   void Mutate(std::shared_ptr<Shape> original, const Image& current) {
     original->Mutate();
-    original->SetColor(target_, current, alpha_);
+    original->ComputeColor(target_, current, alpha_);
   }
 
 public:

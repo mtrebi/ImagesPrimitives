@@ -42,7 +42,7 @@ private:
     while (!shape->Valid()) {
       shape = ShapeConstructor(type);
     }
-    shape->SetColor(target_, current, alpha_);
+    shape->ComputeColor(target_, current, alpha_);
     return shape;
   }
 
