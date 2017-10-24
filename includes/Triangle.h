@@ -26,12 +26,11 @@ private:
 
   mutable std::uniform_int_distribution<int> vertex_distribution_;
   mutable std::uniform_int_distribution<int> mutation_distribution_;
-  // TODO CACHE THINGS IN TRIANGLE!
+
   void BarycentricCoords(double& u, double& v, double& w, const Point& point) const {
     const Vector v2 = point - this->v0_;
     double d20 = v2 * v0;
     double d21 = v2 * v1;
-    double denom = d00 * d11 - d01 * d01;
     v = (d11 * d20 - d01 * d21) / denom;
     w = (d00 * d21 - d01 * d20) / denom;
     u = 1.0f - v - w;
@@ -77,7 +76,7 @@ public:
     generator_ = std::default_random_engine(seed);
 
     vertex_distribution_ = std::uniform_int_distribution<int>(0, 2);
-    mutation_distribution_ = std::uniform_int_distribution<int>(-5, 5);
+    mutation_distribution_ = std::uniform_int_distribution<int>(-16, 16);
     UpdateBarycentricCache();
   }
 
