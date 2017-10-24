@@ -18,16 +18,17 @@ private:
     pv1_,
     pv2_;
 
+  // Barycentric cache
+  Vector v0, v1;
+  double d00, d01, d11, denom;
+
   mutable std::default_random_engine generator_;
 
   mutable std::uniform_int_distribution<int> vertex_distribution_;
   mutable std::uniform_int_distribution<int> mutation_distribution_;
-
+  // TODO CACHE THINGS IN TRIANGLE!
   void BarycentricCoords(double& u, double& v, double& w, const Point& point) const {
-    const Vector v0 = this->v1_ - this->v0_, v1 = this->v2_ - this->v0_, v2 = point - this->v0_;
-    double d00 = v0 * v0;
-    double d01 = v0 * v1;
-    double d11 = v1 * v1;
+    const Vector v2 = point - this->v0_;
     double d20 = v2 * v0;
     double d21 = v2 * v1;
     double denom = d00 * d11 - d01 * d01;
@@ -52,6 +53,14 @@ private:
     return mutated;
   }
 
+  void UpdateBarycentricCache() {
+    v0 = this->v1_ - this->v0_;
+    v1 = this->v2_ - this->v0_;
+    d00 = v0 * v0;
+    d01 = v0 * v1;
+    d11 = v1 * v1;
+  }
+
 public:
   Triangle() : 
     Shape(0,0), v0_(Point()), v1_(Point()), v2_(Point()) { 
@@ -68,7 +77,8 @@ public:
     generator_ = std::default_random_engine(seed);
 
     vertex_distribution_ = std::uniform_int_distribution<int>(0, 2);
-    mutation_distribution_ = std::uniform_int_distribution<int>(-16, 16);
+    mutation_distribution_ = std::uniform_int_distribution<int>(-5, 5);
+    UpdateBarycentricCache();
   }
 
 
@@ -130,8 +140,8 @@ public:
       else {
         break;
       }
-
     }
+    UpdateBarycentricCache();
   }
 
   void Rollback() override {
@@ -139,5 +149,6 @@ public:
     v0_ = pv0_;
     v1_ = pv1_;
     v2_ = pv2_;
+    UpdateBarycentricCache();
   }
 };
