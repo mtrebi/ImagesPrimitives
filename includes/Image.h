@@ -55,9 +55,9 @@ public:
   }
 
   RGBApixel AverageColor() const {
-    long r = 0,
-          g = 0,
-          b = 0;
+    long long r = 0,
+      g = 0,
+      b = 0;
     for (int i = 0; i < bmp_.TellWidth(); ++i) {
       for (int j = 0; j < bmp_.TellHeight(); ++j) {
         const RGBApixel color = bmp_.GetPixel(i, j);
@@ -68,9 +68,10 @@ public:
     }
 
     RGBApixel average_color;
-    average_color.Red = r / (bmp_.TellWidth() * bmp_.TellHeight());
-    average_color.Green = g / (bmp_.TellWidth() * bmp_.TellHeight());
-    average_color.Blue = b / (bmp_.TellWidth() * bmp_.TellHeight());
+    average_color.Red = r / GetSize();
+    average_color.Green = g / GetSize();
+    average_color.Blue = b / GetSize();
+    average_color.Alpha = 255;
 
     return average_color;
   }
@@ -88,7 +89,16 @@ public:
     for (int x = bbox.min.x; x < bbox.max.x; ++x) {
       for (int y = bbox.min.y; y < bbox.max.y; ++y) {
         if (shape->Contains(Point(x, y))) {
-          this->SetPixel(x, y, shape->GetColor());
+          RGBApixel current_color = this->GetPixel(x, y);
+          const float alpha = shape->GetColor().Alpha / 255.0f;
+          const float one_minus_alpha = 1 - alpha;
+
+          RGBApixel new_color;
+          new_color.Red = shape->GetColor().Red * alpha + one_minus_alpha * current_color.Red;
+          new_color.Green = shape->GetColor().Green * alpha + one_minus_alpha * current_color.Green;
+          new_color.Red = shape->GetColor().Blue * alpha + one_minus_alpha * current_color.Blue;
+          new_color.Alpha = shape->GetColor().Alpha;
+          this->SetPixel(x, y, new_color);
         }
       }
     }
