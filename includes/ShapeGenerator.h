@@ -47,7 +47,7 @@ private:
   }
 
 public:
-  const int RANDOM_BEST = 10;
+  const int RANDOM_BEST = 100;
 
 
   ShapeGenerator(const Image& image, const int alpha)

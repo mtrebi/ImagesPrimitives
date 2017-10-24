@@ -44,5 +44,5 @@ public:
     energy_ = penergy_;
   }
 
-  void SetColor(const Image& target, const Image& current, const int alpha); 
+  void ComputeColor(const Image& target, const Image& current, const int alpha); 
 };

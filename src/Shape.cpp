@@ -1,7 +1,7 @@
 #include "Shape.h"
 #include "Utils.h"
 
-void Shape::SetColor(const Image& target, const Image& current, const int alpha) {
+void Shape::ComputeColor(const Image& target, const Image& current, const int alpha) {
   const BoundingBox bbox = this->GetBBox();
   long long total_red = 0,
     total_green = 0,

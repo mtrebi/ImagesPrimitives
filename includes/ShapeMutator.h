@@ -13,7 +13,7 @@ private:
   }
 
 public:
-  const int MUTATIONS = 100;
+  const int MUTATIONS = 200;
 
   ShapeMutator(const Image& image, const int alpha)
     : target_(image), alpha_(alpha) {
@@ -21,7 +21,7 @@ public:
   }
 
   void MutateBest(const Image& current, std::shared_ptr<Shape> shape) {
-    float best_energy = std::numeric_limits<float>::max();
+    float best_energy = shape->GetEnergy();
     for (int i = 0; i < MUTATIONS; ++i) {
       Mutate(shape, current);
 
