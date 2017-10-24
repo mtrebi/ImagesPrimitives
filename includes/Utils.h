@@ -52,23 +52,46 @@ public:
 
 
   static void AddShape(Image& image, const std::shared_ptr<Shape> shape) {
+    int sr, sg, sb, sa;
+    Utils::ScaleByAlpha(sr, sg, sb, sa, shape->GetColor());
+
+    const int m = 0xFFFF;
+    const int ma = 0xFFFF;
+    const float as = (m - (sa * (ma / m))) * 257;
+    const int a = as;
+
     const BoundingBox bbox = shape->GetBBox();
     for (int x = bbox.min.x; x < bbox.max.x; ++x) {
       for (int y = bbox.min.y; y < bbox.max.y; ++y) {
         if (shape->Contains(Point(x, y))) {
-          RGBApixel current_color = image.GetPixel(x, y);
-          const float alpha = shape->GetColor().Alpha / 255.0f;
-          const float one_minus_alpha = 1 - alpha;
+          RGBApixel d = image.GetPixel(x, y);
 
           RGBApixel new_color;
-          new_color.Red = shape->GetColor().Red * alpha + one_minus_alpha * current_color.Red;
-          new_color.Green = shape->GetColor().Green * alpha + one_minus_alpha * current_color.Green;
-          new_color.Red = shape->GetColor().Blue * alpha + one_minus_alpha * current_color.Blue;
-          new_color.Alpha = shape->GetColor().Alpha;
+          new_color.Red =   ((d.Red   * a + sr * ma) / m) >> 8;
+          new_color.Green = ((d.Green * a + sg * ma) / m) >> 8;
+          new_color.Blue =  ((d.Blue  * a + sb * ma) / m) >> 8;
+          new_color.Alpha = ((d.Alpha * a + sa * ma) / m) >> 8;
+
           image.SetPixel(x, y, new_color);
         }
       }
     }
   }
 
+  // Scale the rgb color components by the alpha component
+  static void ScaleByAlpha(int& sr, int& sg, int& sb, int& sa, const RGBApixel &c) {
+    sr = c.Red | (c.Red << 8);
+    sr *= c.Alpha;
+    sr /= 0xFF;
+
+    sg = c.Green | (c.Green << 8);
+    sg *= c.Alpha;
+    sg /= 0xFF;
+
+    sb = c.Blue | (c.Blue << 8);
+    sb *= c.Alpha;
+    sb /= 0xFF;
+
+    sa = c.Alpha | (c.Alpha << 8);
+  }
 };
