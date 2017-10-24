@@ -20,9 +20,8 @@ private:
 
   mutable std::default_random_engine generator_;
 
-  mutable std::uniform_int_distribution<int> mutation_vertex_distribution_;
-  mutable std::uniform_int_distribution<int> mutation_x_distribution_;
-  mutable std::uniform_int_distribution<int> mutation_y_distribution_;
+  mutable std::uniform_int_distribution<int> vertex_distribution_;
+  mutable std::uniform_int_distribution<int> mutation_distribution_;
 
   void BarycentricCoords(double& u, double& v, double& w, const Point& point) const {
     const Vector v0 = this->v1_ - this->v0_, v1 = this->v2_ - this->v0_, v2 = point - this->v0_;
@@ -42,8 +41,8 @@ private:
   }
 
   Point VertexMutation(const Point& vertex) const {
-    int rx = mutation_x_distribution_(generator_),
-      ry = mutation_y_distribution_(generator_);
+    const int rx = mutation_distribution_(generator_);
+    const int ry = mutation_distribution_(generator_);
     
     const Point mutated = Point(
       Utils::Clamp(vertex.x + rx, 0, max_width_ - 1),
@@ -68,9 +67,8 @@ public:
 
     generator_ = std::default_random_engine(seed);
 
-    mutation_vertex_distribution_ = std::uniform_int_distribution<int>(0, 2);
-    mutation_x_distribution_ = std::uniform_int_distribution<int>(-5, 5);
-    mutation_y_distribution_ = std::uniform_int_distribution<int>(-5, 5);
+    vertex_distribution_ = std::uniform_int_distribution<int>(0, 2);
+    mutation_distribution_ = std::uniform_int_distribution<int>(-16, 16);
   }
 
 
@@ -112,7 +110,7 @@ public:
       this->pv1_ = this->v1_;
       this->pv2_ = this->v2_;
 
-      const int random_vertex = mutation_vertex_distribution_(generator_);
+      const int random_vertex = vertex_distribution_(generator_);
       switch (random_vertex) {
       case 0:
         v0_ = VertexMutation(v0_);
