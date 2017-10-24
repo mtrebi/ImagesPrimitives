@@ -35,19 +35,40 @@ public:
 
         total_diff += r_diff * r_diff + 
                       g_diff * g_diff + 
-                      b_diff * b_diff + 
-                      a_diff * a_diff;
+                      b_diff * b_diff/* + 
+                      a_diff * a_diff*/;
       }
     }
 
-    return sqrt(total_diff / (target.GetSize() * 4)) / 255;
+    return sqrt(total_diff / (target.GetSize() * 3)) / 255;
   }
 
   // Score calculation using root-mean-square-error
   static float Energy(const Image& target, Image current, const std::shared_ptr<Shape> shape) {
-    current.AddShape(shape);
+    Utils::AddShape(current, shape);
     shape->SetEnergy(Energy(target, current));
     return shape->GetEnergy();
+  }
+
+
+  static void AddShape(Image& image, const std::shared_ptr<Shape> shape) {
+    const BoundingBox bbox = shape->GetBBox();
+    for (int x = bbox.min.x; x < bbox.max.x; ++x) {
+      for (int y = bbox.min.y; y < bbox.max.y; ++y) {
+        if (shape->Contains(Point(x, y))) {
+          RGBApixel current_color = image.GetPixel(x, y);
+          const float alpha = shape->GetColor().Alpha / 255.0f;
+          const float one_minus_alpha = 1 - alpha;
+
+          RGBApixel new_color;
+          new_color.Red = shape->GetColor().Red * alpha + one_minus_alpha * current_color.Red;
+          new_color.Green = shape->GetColor().Green * alpha + one_minus_alpha * current_color.Green;
+          new_color.Red = shape->GetColor().Blue * alpha + one_minus_alpha * current_color.Blue;
+          new_color.Alpha = shape->GetColor().Alpha;
+          image.SetPixel(x, y, new_color);
+        }
+      }
+    }
   }
 
 };

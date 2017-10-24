@@ -83,25 +83,4 @@ public:
       }
     }
   }
-
-  void AddShape(const std::shared_ptr<Shape> shape) {
-    const BoundingBox bbox = shape->GetBBox();
-    for (int x = bbox.min.x; x < bbox.max.x; ++x) {
-      for (int y = bbox.min.y; y < bbox.max.y; ++y) {
-        if (shape->Contains(Point(x, y))) {
-          RGBApixel current_color = this->GetPixel(x, y);
-          const float alpha = shape->GetColor().Alpha / 255.0f;
-          const float one_minus_alpha = 1 - alpha;
-
-          RGBApixel new_color;
-          new_color.Red = shape->GetColor().Red * alpha + one_minus_alpha * current_color.Red;
-          new_color.Green = shape->GetColor().Green * alpha + one_minus_alpha * current_color.Green;
-          new_color.Red = shape->GetColor().Blue * alpha + one_minus_alpha * current_color.Blue;
-          new_color.Alpha = shape->GetColor().Alpha;
-          this->SetPixel(x, y, new_color);
-        }
-      }
-    }
-  }
-
 };
