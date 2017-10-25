@@ -7,6 +7,7 @@
 #include "ThreadPool.h"
 #include <memory>
 #include <functional>
+#include <string>
 
 class Approximator {
 private:
@@ -65,12 +66,12 @@ private:
   // TODO Aliasing
 public:
   static const ShapeType SHAPE_TYPE = ShapeType::TRIANGLE;
-  static const int MAX_ITERATIONS = 50;
-  const float MIN_ENERGY = 0.025f;
-  static const int N_HC = 15;
+  const int MAX_ITERATIONS = 200;
+  const float MIN_ENERGY = 0.030f;
+  static const int N_HC = 30;
   static const int ALPHA = 128;
   static const int N_THREADS = 7;
-
+  static const bool GIF = true;
   Approximator(const Image& target) :
     current_(target.GetWidth(), target.GetHeight(), target.GetBitDepth(), target.GetHDPI(), target.GetVDPI()),
     target_(target),
@@ -98,14 +99,19 @@ public:
       const float delta_energy = new_shape->GetEnergy() - current_energy_;
       if (delta_energy < 0) {
         current_energy_ = new_shape->GetEnergy();
-        current_.AddShape(new_shape);
+        Utils::AddShape(current_, new_shape);
         --iterations;
-      }
+        if (GIF) {
+          const std::string path = "Output/gif/" + std::to_string(MAX_ITERATIONS - iterations) + ".bmp";
+          current_.Export(path);
+        }
+
+      }/*
       else if (exp(-delta_energy / iterations) > distribution(generator)){
         current_energy_ = new_shape->GetEnergy();
-        current_.AddShape(new_shape);
+        Utils::AddShape(current_, new_shape);
         --iterations;
-      }
+      }*/
     }
     return current_;
   }
