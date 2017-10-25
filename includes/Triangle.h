@@ -6,6 +6,7 @@
 #include "Point.h"
 #include "Utils.h"
 #include "Shape.h"
+#include "RandomGenerator.h"
 
 #include "../lib/EasyBMP_1.06/EasyBMP.h"
 
@@ -22,11 +23,12 @@ private:
   Vector v0, v1;
   double d00, d01, d11, denom;
 
-  mutable std::default_random_engine generator_;
 
-  mutable std::uniform_int_distribution<int> vertex_distribution_;
-  mutable std::uniform_int_distribution<int> mutation_distribution_;
+  RandomGenerator random_vertex_;
+  RandomGenerator random_mutation_x_;
+  RandomGenerator random_mutation_y_;
 
+  
   void BarycentricCoords(double& u, double& v, double& w, const Point& point) const {
     const Vector v2 = point - this->v0_;
     double d20 = v2 * v0;
@@ -41,8 +43,8 @@ private:
   }
 
   Point VertexMutation(const Point& vertex) const {
-    const int rx = mutation_distribution_(generator_);
-    const int ry = mutation_distribution_(generator_);
+    const int rx = random_mutation_x_.Random();
+    const int ry = random_mutation_y_.Random();
     
     const Point mutated = Point(
       Utils::Clamp(vertex.x + rx, 0, max_width_ - 1),
@@ -58,6 +60,7 @@ private:
     d00 = v0 * v0;
     d01 = v0 * v1;
     d11 = v1 * v1;
+    denom = d00 * d11 - d01 * d01;
   }
 
 public:
@@ -69,17 +72,13 @@ public:
   Triangle(const Point& v1, const Point& v2, const Point& v3, const int width, const int height)
     : Shape(width, height),
     v0_(v1), v1_(v2), v2_(v3),
-    pv0_(v1), pv1_(v2), pv2_(v3) {
+    pv0_(v1), pv1_(v2), pv2_(v3),
+    random_vertex_(0, 2, 0),
+    random_mutation_x_(-max_width_ / 32, max_width_/ 32, 11),
+    random_mutation_y_(-max_height_ / 32, max_height_ / 32, 13) {
 
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-    generator_ = std::default_random_engine(seed);
-
-    vertex_distribution_ = std::uniform_int_distribution<int>(0, 2);
-    mutation_distribution_ = std::uniform_int_distribution<int>(-16, 16);
     UpdateBarycentricCache();
   }
-
 
   virtual bool Contains(const Point& point) const override{
     double u, v, w;
@@ -88,7 +87,11 @@ public:
   }
 
   virtual bool Valid() const override {
-    return Area() != 0;
+    return 
+      v0_.x >= 0 && v0_.x < max_width_ && v0_.y >= 0 && v0_.y < max_height_ &&
+      v1_.x >= 0 && v1_.x < max_width_ && v1_.y >= 0 && v1_.y < max_height_ &&
+      v2_.x >= 0 && v2_.x < max_width_ && v2_.y >= 0 && v2_.y < max_height_ &&
+      Area() != 0;
   }
 
   virtual BoundingBox GetBBox() const override {
@@ -119,7 +122,7 @@ public:
       this->pv1_ = this->v1_;
       this->pv2_ = this->v2_;
 
-      const int random_vertex = vertex_distribution_(generator_);
+      const int random_vertex = random_vertex_.Random();
       switch (random_vertex) {
       case 0:
         v0_ = VertexMutation(v0_);
