@@ -1,35 +1,23 @@
 #pragma once
 #include <random>
-#include <chrono>
-
-#include "Triangle.h"
 
 class RandomGenerator {
 private:
 
   mutable std::default_random_engine generator_;
-  mutable std::uniform_int_distribution<int> distributionY_;
-  mutable std::uniform_int_distribution<int> distributionX_;
+  mutable std::uniform_int_distribution<int> distribution_;
 
 public:
-  RandomGenerator(const int width, const int height){
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+  RandomGenerator(){}
+  
+  RandomGenerator(const int min, const int max, const unsigned seed){
+    unsigned real_seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-    generator_ = std::default_random_engine(seed);
-
-    distributionX_ = std::uniform_int_distribution<int>(0, width - 1);
-    distributionY_ = std::uniform_int_distribution<int>(0, height - 1);
+    generator_ = std::default_random_engine(real_seed + seed);
+    distribution_ = std::uniform_int_distribution<int>(min, max);
   }
 
-  int RandomX() const {
-    return distributionX_(generator_);
-  }
-
-  int RandomY() const {
-    return distributionY_(generator_);
-  }
-
-  Point RandomPoint() const {
-    return Point(RandomX(), RandomY());
+  int Random() const {
+    return distribution_(generator_);
   }
 };
