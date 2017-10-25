@@ -12,14 +12,28 @@ enum class ShapeType {
 class ShapeGenerator {
 private:
   Image target_;
-  RandomGenerator generator_;
+  RandomGenerator big_generator_x_, // From 0 to width
+                  big_generator_y_, // From 0 to heigth
+                  small_generator_;
+
+
   int alpha_;
   std::shared_ptr<Shape> GenerateTriangle() const {
-    return std::shared_ptr<Shape>(new Triangle(generator_.RandomPoint(), generator_.RandomPoint(), generator_.RandomPoint(), target_.GetWidth(), target_.GetHeight()));
+    std::shared_ptr<Shape> shape = nullptr;
+
+    while (!shape || !shape->Valid()) {
+      Point v0(big_generator_x_.Random(), big_generator_y_.Random());
+      Point v1(v0.x + small_generator_.Random(), v0.y + small_generator_.Random());
+      Point v2(v0.x + small_generator_.Random(), v0.y + small_generator_.Random());
+
+      shape = std::shared_ptr<Shape>(new Triangle(v0, v1, v2, target_.GetWidth(), target_.GetHeight()));
+    }
+    return shape;
   }
 
   std::shared_ptr<Shape> GenerateEllipse() const {
-    return std::shared_ptr<Shape>(new Ellipse(generator_.RandomPoint(), generator_.RandomX(), generator_.RandomY(), target_.GetWidth(), target_.GetHeight()));
+    return nullptr;// TODO
+    //return std::shared_ptr<Shape>(new Ellipse(generator_.RandomPoint(), generator_.RandomX(), generator_.RandomY(), target_.GetWidth(), target_.GetHeight()));
   }
 
   std::shared_ptr<Shape> ShapeConstructor(const ShapeType type) const {
@@ -51,8 +65,11 @@ public:
 
 
   ShapeGenerator(const Image& image, const int alpha)
-    : target_(image), generator_(target_.GetHeight(), target_.GetWidth()),
-      alpha_(alpha) {
+    : target_(image), 
+    big_generator_x_(0, target_.GetWidth() - 1, 3),
+    big_generator_y_(0, target_.GetHeight() - 1, 7),
+    small_generator_(-std::min(target_.GetWidth(), target_.GetHeight()) / 32, std::min(target_.GetWidth(), target_.GetHeight()) / 32, 1),
+    alpha_(alpha) {
 
 
   }
