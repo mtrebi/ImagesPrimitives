@@ -74,8 +74,8 @@ class BMP
  ~BMP();
  RGBApixel* operator()(int i,int j);
  
- RGBApixel GetPixel( int i, int j ) const;
- bool SetPixel( int i, int j, RGBApixel NewPixel );
+ RGBApixel& GetPixel( int i, int j ) const;
+ bool SetPixel( int i, int j, const RGBApixel& NewPixel );
  
  bool CreateStandardColorTable( void );
  
@@ -84,8 +84,8 @@ class BMP
  bool WriteToFile( const char* FileName );
  bool ReadFromFile( const char* FileName );
  
- RGBApixel GetColor( int ColorNumber ) const;
- bool SetColor( int ColorNumber, RGBApixel NewColor ); 
+ RGBApixel& GetColor( int ColorNumber ) const;
+ bool SetColor( int ColorNumber, const RGBApixel& NewColor ); 
 };
 
 #endif

@@ -114,7 +114,7 @@ void BMFH::display( void )
 
 /* These functions are defined in EasyBMP_BMP.h */
 
-RGBApixel BMP::GetPixel( int i, int j ) const
+RGBApixel& BMP::GetPixel( int i, int j ) const
 {
  using namespace std;
  bool Warn = false;
@@ -135,14 +135,14 @@ RGBApixel BMP::GetPixel( int i, int j ) const
  return Pixels[i][j];
 }
 
-bool BMP::SetPixel( int i, int j, RGBApixel NewPixel )
+bool BMP::SetPixel( int i, int j, const RGBApixel & NewPixel )
 {
  Pixels[i][j] = NewPixel;
  return true;
 }
 
 
-bool BMP::SetColor( int ColorNumber , RGBApixel NewColor )
+bool BMP::SetColor( int ColorNumber , const RGBApixel& NewColor )
 {
  using namespace std;
  if( BitDepth != 1 && BitDepth != 4 && BitDepth != 8 )
@@ -178,7 +178,7 @@ bool BMP::SetColor( int ColorNumber , RGBApixel NewColor )
  return true;
 }
 
-RGBApixel BMP::GetColor( int ColorNumber ) const
+RGBApixel& BMP::GetColor( int ColorNumber ) const
 //RGBApixel BMP::GetColor( int ColorNumber )
 { 
  RGBApixel Output;
@@ -376,7 +376,7 @@ BMP& BMP::operator=(const BMP& other) {
   {
     for (int i = 0; i < Width; i++)
     {
-      //Pixels[i][j] = *Input(i,j);
+      //Pixels[i][j] = other(i,j);
       Pixels[i][j] = other.GetPixel(i, j); // *Input(i,j);
     }
   }
