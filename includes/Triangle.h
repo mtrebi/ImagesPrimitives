@@ -12,145 +12,144 @@
 
 class Triangle : public Shape {
 private:
-  Point v0_,
-    v1_,
-    v2_,
-    pv0_,
-    pv1_,
-    pv2_;
-
-  // Barycentric cache
-  Vector v0, v1;
-  double d00, d01, d11, denom;
-
-
-  RandomGenerator random_vertex_;
-  RandomGenerator random_mutation_x_;
-  RandomGenerator random_mutation_y_;
-
-  
-  void BarycentricCoords(double& u, double& v, double& w, const Point& point) const {
-    const Vector v2 = point - this->v0_;
-    double d20 = v2 * v0;
-    double d21 = v2 * v1;
-    v = (d11 * d20 - d01 * d21) / denom;
-    w = (d00 * d21 - d01 * d20) / denom;
-    u = 1.0f - v - w;
-  }
+  Point v0_, v1_, v2_;
 
   float Area() const {
     return abs(((v1_.x - v0_.x) * (v2_.y - v0_.y)) - (v1_.y - v0_.y) * (v2_.x - v0_.x));
   }
 
-  Point VertexMutation(const Point& vertex) const {
-    const int rx = random_mutation_x_.Random();
-    const int ry = random_mutation_y_.Random();
-    
-    const Point mutated = Point(
-      Utils::Clamp(vertex.x + rx, 0, max_width_ - 1),
-      Utils::Clamp(vertex.y + ry, 0, max_height_ - 1)
-    );
-
-    return mutated;
+  void RasterizeTriangle(int x1, int y1, int x2, int y2, int x3, int y3) {
+    if (y1 > y3) {
+      Utils::Swap(x1, x3);
+      Utils::Swap(y1, y3);
+    }
+    if (y1 > y2){
+      Utils::Swap(x1, x2);
+      Utils::Swap(y1, y2);
+    }
+    if (y2 > y3){
+      Utils::Swap(x2, x3);
+      Utils::Swap(y2, y3);
+    }
+    if (y2 == y3){
+      RasterizeTriangleBottom(x1, y1, x2, y2, x3, y3);
+    }
+    else if (y1 == y2){
+      RasterizeTriangleTop(x1, y1, x2, y2, x3, y3);
+    }
+    else {
+      const int x4 = x1 + (((float)(y2 - y1)) / (y3 - y1)) * (x3 - x1);
+      const int y4 = y2;
+      RasterizeTriangleBottom(x1, y1, x2, y2, x4, y4);
+      RasterizeTriangleTop(x2, y2, x4, y4, x3, y3);
+    }
   }
 
-  void UpdateBarycentricCache() {
-    v0 = this->v1_ - this->v0_;
-    v1 = this->v2_ - this->v0_;
-    d00 = v0 * v0;
-    d01 = v0 * v1;
-    d11 = v1 * v1;
-    denom = d00 * d11 - d01 * d01;
+  void RasterizeTriangleBottom(const int x1, const int y1, const int x2, const int y2, const int x3, const int y3) {
+    const float s1 = ((float)(x2 - x1)) / (y2 - y1);
+    const float s2 = ((float)(x3 - x1)) / (y3 - y1);
+    float ax = x1,
+      bx = x1;
+
+    for (int y = y1; y <= y2; ++y) {
+      int a = ax;
+      int b = bx;
+      ax += s1;
+      bx += s2;
+      if (a > b) {
+        Utils::Swap(a, b);
+      }
+
+      const int final_y = Utils::Clamp(y, 0, height_ - 1);
+      const int final_a = Utils::Clamp(a, 0, width_ - 1);
+      const int final_b = Utils::Clamp(b, 0, width_ - 1);
+
+      lines_.push_back(Scanline(final_y, final_a, final_b));
+    }
   }
 
-public:
-  Triangle() : 
-    Shape(0,0), v0_(Point()), v1_(Point()), v2_(Point()) { 
-  
+  void RasterizeTriangleTop(const int x1, const int y1, const int x2, const int y2, const int x3, const int y3) {
+    std::vector<Scanline> lines;
+    const float s1 = ((float)(x3 - x1)) / (y3 - y1);
+    const float s2 = ((float)(x3 - x2)) / (y3 - y2);
+    float ax = x3;
+    float bx = x3;
+
+    for (int y = y3; y > y1; --y) {
+      ax -= s1;
+      bx -= s2;
+      int a = ax;
+      int b = bx;
+      if (a > b) {
+        Utils::Swap(a, b);
+      }
+      const int final_y = Utils::Clamp(y, 0, height_ -1);
+      const int final_a = Utils::Clamp(a, 0, width_ -1);
+      const int final_b = Utils::Clamp(b, 0, width_ -1);
+
+      lines_.push_back(Scanline(final_y, final_a, final_b));
+    }
   }
 
-  Triangle(const Point& v1, const Point& v2, const Point& v3, const int width, const int height)
-    : Shape(width, height),
-    v0_(v1), v1_(v2), v2_(v3),
-    pv0_(v1), pv1_(v2), pv2_(v3),
-    random_vertex_(0, 2, 0),
-    random_mutation_x_(-max_width_ / 32, max_width_/ 32, 11),
-    random_mutation_y_(-max_height_ / 32, max_height_ / 32, 13) {
+public:  
+  Triangle(RandomGenerator& generator, const int width, const int height)
+    : Shape(generator, width, height){
 
-    UpdateBarycentricCache();
+    v0_.x = generator_->Random(0, width_);
+    v0_.y = generator_->Random(0, height_);
+
+    v1_.x = v0_.x + generator_->Random(-16, 16);
+    v1_.y = v0_.y + generator_->Random(-16, 16);
+
+    v2_.x = v0_.x + generator_->Random(-16, 16);
+    v2_.y = v0_.y + generator_->Random(-16, 16);
   }
 
-  virtual bool Contains(const Point& point) const override{
-    double u, v, w;
-    BarycentricCoords(u, v, w, point);
-    return (u >= 0 && v >= 0 && u + v <= 1.0);
+  virtual ~Triangle() { }
+
+  std::shared_ptr<Shape> Copy() const {
+    std::shared_ptr<Shape> copy(new Triangle(*this));
+    return copy;
   }
 
-  virtual bool Valid() const override {
-    return 
-      v0_.x >= 0 && v0_.x < max_width_ && v0_.y >= 0 && v0_.y < max_height_ &&
-      v1_.x >= 0 && v1_.x < max_width_ && v1_.y >= 0 && v1_.y < max_height_ &&
-      v2_.x >= 0 && v2_.x < max_width_ && v2_.y >= 0 && v2_.y < max_height_ &&
+  std::vector<Scanline>& Rasterize() {
+    if (lines_.size() == 0 || has_changed_) {
+      lines_.clear();
+      RasterizeTriangle(v0_.x, v0_.y, v1_.x, v1_.y, v2_.x, v2_.y);
+      has_changed_ = false;
+    }
+    return lines_;
+  }
+
+  bool Valid() const {
+    return
+      v0_.x >= 0 && v0_.x < width_ && v0_.y >= 0 && v0_.y < height_ &&
+      v1_.x >= 0 && v1_.x < width_ && v1_.y >= 0 && v1_.y < height_ &&
+      v2_.x >= 0 && v2_.x < width_ && v2_.y >= 0 && v2_.y < height_ &&
       Area() != 0;
   }
 
-  virtual BoundingBox GetBBox() const override {
-    BoundingBox bbox;
-    std::array<Point, 3> vertices{ this->v0_, this->v1_, this->v2_ };
-
-    for (auto& vertex : vertices) {
-      if (vertex.x < bbox.min.x) {
-        bbox.min.x = vertex.x;
-      }
-      if (vertex.y < bbox.min.y) {
-        bbox.min.y = vertex.y;
-      }
-
-      if (vertex.x > bbox.max.x) {
-        bbox.max.x = vertex.x;
-      }
-      if (vertex.y > bbox.max.y) {
-        bbox.max.y = vertex.y;
-      }
-    }
-    return bbox;
-  }
-
   void Mutate() {
+    has_changed_ = true;
     while (true) {
-      this->pv0_ = this->v0_;
-      this->pv1_ = this->v1_;
-      this->pv2_ = this->v2_;
-
-      const int random_vertex = random_vertex_.Random();
+      const int random_vertex = generator_->Random(0, 2);
       switch (random_vertex) {
       case 0:
-        v0_ = VertexMutation(v0_);
+        v0_.x = Utils::Clamp(v0_.x + generator_->Random(-16, 16), 0, width_ - 1);
+        v0_.y = Utils::Clamp(v0_.y + generator_->Random(-16, 16), 0, height_ - 1);
         break;
       case 1:
-        v1_ = VertexMutation(v1_);
+        v1_.x = Utils::Clamp(v1_.x + generator_->Random(-16, 16), 0, width_ - 1);
+        v1_.y = Utils::Clamp(v1_.y + generator_->Random(-16, 16), 0, height_ - 1);
         break;
       case 2:
-        v2_ = VertexMutation(v2_);
+        v2_.x = Utils::Clamp(v2_.x + generator_->Random(-16, 16), 0, width_ - 1);
+        v2_.y = Utils::Clamp(v2_.y + generator_->Random(-16, 16), 0, height_ - 1);
         break;
-      default:
-        throw std::invalid_argument("rand is out of boundaries");
       }
-      if (!Valid()) {
-        Rollback();
-      }
-      else {
+      if (Valid()) {
         break;
       }
     }
-    UpdateBarycentricCache();
-  }
-
-  void Rollback() override {
-    Shape::Rollback();
-    v0_ = pv0_;
-    v1_ = pv1_;
-    v2_ = pv2_;
-    UpdateBarycentricCache();
   }
 };

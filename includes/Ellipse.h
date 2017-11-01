@@ -12,116 +12,75 @@
 
 class Ellipse : public Shape {
 private:
-  Point c_, pc_;
-  int rx_, prx_, ry_, pry_;
-
-  mutable std::default_random_engine generator_;
-
-  mutable std::uniform_int_distribution<int> mutation_attr_distribution_;
-  mutable std::uniform_int_distribution<int> mutation_x_distribution_;
-  mutable std::uniform_int_distribution<int> mutation_y_distribution_;
-
-  Point CenterMutation() const {
-    int rx = mutation_x_distribution_(generator_),
-        ry = mutation_y_distribution_(generator_);
-
-    const Point mutated = Point(
-      Utils::Clamp(c_.x + rx, 0, max_width_ - 1),
-      Utils::Clamp(c_.y + ry, 0, max_height_ - 1)
-    );
-
-    return mutated;
-  }
-
-  int RadiusXMutation() const {
-    const int mutation = mutation_x_distribution_(generator_);
-    const int mutation_clamped = Utils::Clamp(mutation + rx_, 0, max_width_ - 1);
-    return mutation_clamped;
-  }
-
-  int RadiusYMutation() const {
-    const int mutation = mutation_y_distribution_(generator_);
-    const int mutation_clamped = Utils::Clamp(mutation + rx_, 0, max_height_ - 1);
-    return mutation_clamped;
-  }
+  Point c_;
+  int rx_, ry_;
 
 public:
-  Ellipse() :
-    Shape(0,0), c_(Point()), rx_(0), ry_(0) {
+  Ellipse(RandomGenerator& generator, const int width, const int height)
+    : Shape(generator, width, height) {
+    c_.x = generator_->Random(0, width_);
+    c_.y = generator_->Random(0, width_);
 
+    rx_ = generator_->Random(1, 31);
+    ry_ = generator_->Random(1, 31);
   }
 
-  Ellipse(const Point& c, const int rx, const int ry, const int width, const int height)
-    : Shape(width, height),
-    c_(c), rx_(rx), ry_(ry),
-     pc_(c), prx_(rx), pry_(ry)
-  {
+  virtual ~Ellipse() { }
 
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 
-    generator_ = std::default_random_engine(seed);
-
-    mutation_attr_distribution_ = std::uniform_int_distribution<int>(0, 2);
-    mutation_x_distribution_ = std::uniform_int_distribution<int>(-max_width_ / 2, max_width_ / 2);
-    mutation_y_distribution_ = std::uniform_int_distribution<int>(-max_height_ / 2, max_height_ / 2);
+  std::shared_ptr<Shape> Copy() const {
+    std::shared_ptr<Shape> copy(new Ellipse(*this));
+    return copy;
   }
 
+  std::vector<Scanline>& Rasterize() {
+    if (lines_.size() == 0 || has_changed_) {
+      lines_.clear();
 
-  virtual bool Contains(const Point& point) const override {
-    return (pow(point.x - c_.x, 2) / (rx_ * rx_)) + (pow(point.y - c_.y, 2) / (ry_ * ry_)) <= 1;
-  }
+      const float aspect = (float) rx_ / ry_;
+      for (int dy = 0; dy <= ry_; ++dy) {
+        const int y1 = c_.y - dy;
+        const int y2 = c_.y + dy;
 
-  virtual bool Valid() const override {
-    BoundingBox bbox = GetBBox();
-    return rx_ > 0 && ry_ > 0 &&
-      (bbox.min.x >= 0 && bbox.min.x <= max_width_ - 1) &&
-      (bbox.min.y >= 0 && bbox.min.y <= max_height_ - 1) &&
-      (bbox.max.x >= 0 && bbox.max.x <= max_width_ - 1) &&
-      (bbox.max.y >= 0 && bbox.max.y <= max_height_ - 1);
-  }
+        if ((y1 < 0 || y1 >= height_) && (y2 < 0 || y2 >= height_)) {
+          continue;
+        }
 
-  virtual BoundingBox GetBBox() const override {
-    BoundingBox bbox;
-    bbox.min = Point(c_.x - rx_, c_.y - ry_);
-    bbox.max = Point(c_.x + rx_, c_.y + ry_);
-    return bbox;
+        const int s = sqrt(ry_ * ry_ - dy * dy) * aspect;
+        int x1 = c_.x - s;
+        int x2 = c_.x + s;
+
+        x1 = Utils::Clamp(x1, 0, width_ - 1);
+        x2 = Utils::Clamp(x2, 0, width_ - 1);
+
+        if (y1 >= 0 && y1 < height_) {
+          lines_.push_back(Scanline(y1, x1, x2));
+        }
+
+        if (y2 >= 0 && y2 < height_ && dy > 0) {
+          lines_.push_back(Scanline(y2, x1, x2));
+        }
+
+      }
+      has_changed_ = false;
+    }
+    return lines_;
   }
 
   void Mutate() {
-    while (true) {
-      this->pc_ = this->c_;
-      this->prx_ = this->rx_;
-      this->pry_ = this->ry_;
-      
-      const int random_vertex = mutation_attr_distribution_(generator_);
-
-      switch (random_vertex) {
-      case 0:
-        this->c_ = CenterMutation();
-        break;
-      case 1:
-        this->rx_ = RadiusXMutation();
-        break;
-      case 2:
-        this->ry_ = RadiusYMutation();
-        break;
-      default:
-        throw std::invalid_argument("rand is out of boundaries");
-      }
-
-      if (!Valid()) {
-        Rollback();
-      }
-      else {
-        break;
-      }
+    has_changed_ = true;
+    const int random_vertex = generator_->Random(0, 2);
+    switch (random_vertex) {
+    case 0:
+      c_.x = Utils::Clamp(c_.x + generator_->Random(-16, 16), 0, width_ - 1);
+      c_.y = Utils::Clamp(c_.y + generator_->Random(-16, 16), 0, height_ - 1);
+      break;
+    case 1:
+      rx_ = Utils::Clamp(rx_ + generator_->Random(-16, 16), 1, width_ - 1);
+      break;
+    case 2:
+      ry_ = Utils::Clamp(ry_ + generator_->Random(-16, 16), 1, height_ - 1);
+      break;
     }
-  }
-
-  void Rollback() override {
-    Shape::Rollback();
-    this->c_ = this->pc_;
-    this->rx_ = this->prx_;
-    this->ry_ = this->pry_;
   }
 };
