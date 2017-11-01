@@ -1,23 +1,21 @@
 #pragma once
+#pragma once
 #include <random>
-
+#include <chrono>
 class RandomGenerator {
 private:
-
-  mutable std::default_random_engine generator_;
-  mutable std::uniform_int_distribution<int> distribution_;
+  mutable std::uniform_int_distribution<int> uniform_dist{0, INT_MAX};
+  mutable std::mt19937 generator_{ std::random_device{}() };
 
 public:
-  RandomGenerator(){}
-  
-  RandomGenerator(const int min, const int max, const unsigned seed){
-    unsigned real_seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-    generator_ = std::default_random_engine(real_seed + seed);
-    distribution_ = std::uniform_int_distribution<int>(min, max);
+  RandomGenerator(std::mt19937::result_type seed)
+    : generator_(seed) {
   }
 
-  int Random() const {
-    return distribution_(generator_);
+  RandomGenerator(const RandomGenerator& r) = delete;
+
+  int Random(const int lower_bound, const int upper_bound) const {
+    std::uniform_int_distribution<int> dist(lower_bound, upper_bound);
+    return dist(generator_);
   }
 };
