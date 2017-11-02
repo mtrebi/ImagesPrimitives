@@ -71,7 +71,7 @@ public:
   }
 
   static float DifferencePartial(const Image& target, const Image& before, const Image& after, const float score, const std::vector<Scanline>& lines) {
-    long long total = pow(score * 255, 2) * target.GetHeight() * target.GetHeight() * 3;
+    long long total = pow(score * 255, 2) * target.GetHeight() * target.GetWidth() * 3;
 
     for (const auto& line : lines) {
       for (int x = line.X1; x <= line.X2; ++x) {
@@ -91,7 +91,8 @@ public:
         total += dr2*dr2 + dg2*dg2 + db2*db2;
       }
     }
-    return sqrt(total / (target.GetSize() * 3.0f)) / 255;
+
+    return sqrt(total / (target.GetSize() * 3.0f)) / 255;;
   }
 
 };
