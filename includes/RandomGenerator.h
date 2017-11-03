@@ -9,7 +9,7 @@ private:
 
 public:
   RandomGenerator(std::mt19937::result_type seed)
-    : generator_(seed) {
+    : generator_(seed + std::chrono::high_resolution_clock::now().time_since_epoch().count()) {
   }
 
   RandomGenerator(const RandomGenerator& r) = delete;
