@@ -1,8 +1,9 @@
 #pragma once
-#include "Image.h"
+#include "Model.h"
+#include "State.h"
+
+
 #include "Triangle.h"
-#include "ShapeGenerator.h"
-#include "ShapeMutator.h"
 #include "Utils.h"
 #include "ThreadPool.h"
 #include <memory>
@@ -11,108 +12,54 @@
 
 class Approximator {
 private:
-  Image current_,
-        target_;
-
-  float current_energy_ = 0;
-
-  ShapeGenerator shape_generator_;
-  ShapeMutator shape_mutator_;
-
+  Model model_;
   ctpl::thread_pool thread_pool_;
-
-  void Init() {
-    current_.SetBaseColor(target_.AverageColor());
-    current_energy_ = Utils::Energy(target_, current_);
-  }
   
-  std::shared_ptr<Shape> HillClimber(const Image& current) {
-    std::shared_ptr<Shape> new_shape = shape_generator_.GenerateBest(current, SHAPE_TYPE);
-    shape_mutator_.MutateBest(current, new_shape);
-    return new_shape;
-  }
-
-  std::shared_ptr<Shape> BestHillClimber(const Image& current) {
-    std::shared_ptr<Shape> best_shape;
-    std::future<std::shared_ptr<Shape>> results[N_HC];
-
-    for (int i = 0; i < N_HC; ++i) {
-      results[i] = thread_pool_.push(std::bind(&Approximator::HillClimber, this, std::ref(current))); //
+  void MultiThreadingBestHillClimb(Model& model, const ShapeType&, const int alpha, const int n_climbs, const int n_random_state) {
+    std::future<State> results[kN_THREADS];
+    for (int i = 0; i < kN_THREADS; ++i) {
+      RandomGenerator generator(i);
+      results[i] = thread_pool_.push(std::bind(&Model::BestHillClimb, std::ref(model_), std::ref(generator), kSHAPE_TYPE, kALPHA, kN_CLIMBS, kN_RANDOM_STATE));
     }
 
-    for (int i = 0; i < N_HC; ++i) {
+    State best_state, state;
+    for (int i = 0; i < kN_THREADS; ++i) {
       if (results[i].valid()) {
-        auto new_shape = results[i].get();
-        if (!best_shape || new_shape->GetEnergy() < best_shape->GetEnergy()) {
-          best_shape = new_shape;
+        state = results[i].get();
+        if (i == 0 || state.energy < best_state.energy) {
+          best_state = state;
         }
       }
     }
-    return best_shape;
+
+    model_.Add(best_state.shape, best_state.alpha); 
   }
 
-  std::shared_ptr<Shape> SingleThreadBestHillClimber(const Image& current) {
-    std::shared_ptr<Shape> best_shape;
-    for (int i = 0; i < N_HC; ++i) {
-      std::shared_ptr<Shape> new_shape = shape_generator_.GenerateBest(current, SHAPE_TYPE);
-      shape_mutator_.MutateBest(current, new_shape);
-      if (!best_shape || new_shape->GetEnergy() < best_shape->GetEnergy()) {
-        best_shape = new_shape;
-      }
-    }
-    return best_shape;
-  }
-  // TODO Optimize score differencePartial
-  // TODO Aliasing
 public:
-  static const ShapeType SHAPE_TYPE = ShapeType::TRIANGLE;
-  const int MAX_ITERATIONS = 200;
-  const float MIN_ENERGY = 0.030f;
-  static const int N_HC = 30;
-  static const int ALPHA = 128;
-  static const int N_THREADS = 7;
-  static const bool GIF = true;
+  static const int kN_THREADS = 8;
+  const int kN_SHAPES = 500;
+  const int kN_RANDOM_STATE = 1000;  
+  const int kN_CLIMBS = 100;       
+  const int kALPHA = 128;
+
+  const std::string kPATH = "Output/lion.bmp";
+  const std::string kPATH_GIF = "Output/gif/output";
+  const ShapeType kSHAPE_TYPE = ShapeType::TRIANGLE;
+  static const bool kGIF = false;
+
   Approximator(const Image& target) :
-    current_(target.GetWidth(), target.GetHeight(), target.GetBitDepth(), target.GetHDPI(), target.GetVDPI()),
-    target_(target),
-    shape_generator_(target_, ALPHA),
-    shape_mutator_(target_, ALPHA),
-    thread_pool_(N_THREADS) {
+    model_(target, Utils::AverageColor(target)),
+    thread_pool_(kN_THREADS) {
   }
 
-  Image Run() {
-    Init();
-    
-    auto generator = std::default_random_engine();
-    auto distribution = std::uniform_int_distribution<int>(0, 1);
-    
-    int iterations = MAX_ITERATIONS;
-    while (current_energy_ > MIN_ENERGY && iterations > 0) {
-      std::cout << "Iteration " << MAX_ITERATIONS - iterations << " - Score " << current_energy_ << std::endl;
-
-      std::shared_ptr<Shape> new_shape = BestHillClimber(current_); 
-
-      if (!new_shape) {
-        continue;
+  void Run() {
+    for (int i = 0; i < kN_SHAPES; ++i) {
+      std::cout << i << ": " << model_.GetEnergy() << std::endl;
+      MultiThreadingBestHillClimb(model_, kSHAPE_TYPE, kALPHA, kN_CLIMBS, kN_RANDOM_STATE);
+      if (kGIF) {
+       model_.Export(kPATH_GIF + std::to_string(i) + ".bmp");
       }
-
-      const float delta_energy = new_shape->GetEnergy() - current_energy_;
-      if (delta_energy < 0) {
-        current_energy_ = new_shape->GetEnergy();
-        Utils::AddShape(current_, new_shape);
-        --iterations;
-        if (GIF) {
-          const std::string path = "Output/gif/" + std::to_string(MAX_ITERATIONS - iterations) + ".bmp";
-          current_.Export(path);
-        }
-
-      }/*
-      else if (exp(-delta_energy / iterations) > distribution(generator)){
-        current_energy_ = new_shape->GetEnergy();
-        Utils::AddShape(current_, new_shape);
-        --iterations;
-      }*/
     }
-    return current_;
+    model_.Export(kPATH);
   }
 };
