@@ -95,11 +95,11 @@ private:
     return color;
   }
 
-  State HillClimb(const State& s, const int n_climbs) {
+  State HillClimb(const State& s, const int n_climbs, const int max_climbs) {
     State state = State(s);
     State best_state = State(s);
-
-    for (int i = 0; i < n_climbs; ++i) {
+    int n_mutations = 0;
+    for (int i = 0; i < n_climbs && n_mutations < max_climbs; ++i) {
       State previous = state.Mutate();
       state.energy = Energy(state.shape, state.alpha);
       
@@ -110,7 +110,7 @@ private:
         best_state = State(state);
         i = -1;
       }
-
+      ++n_mutations;
     }
     return best_state;
   }
@@ -127,9 +127,9 @@ public:
   float GetEnergy() const { return energy_; }
   bool Export(const std::string path) { return current_.Export(path); }
 
-  State BestHillClimb(RandomGenerator& generator, const ShapeType& shape_type,const int alpha, const int n_climbs, const int n_random_state) {
+  State BestHillClimb(RandomGenerator& generator, const ShapeType& shape_type,const int alpha, const int n_climbs, const int max_climbs, const int n_random_state) {
     State best_random_state = BestRandomState(generator, shape_type, n_random_state, alpha);
-    State best_hillclimb_state = HillClimb(best_random_state, n_climbs);
+    State best_hillclimb_state = HillClimb(best_random_state, n_climbs, max_climbs);
     std::cout << "\t" << n_random_state << "x random: " << best_random_state.energy << " -> " << n_climbs << "x hill climb: " << best_hillclimb_state.energy << std::endl;
     return best_hillclimb_state;
   }
