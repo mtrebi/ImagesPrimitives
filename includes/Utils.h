@@ -92,6 +92,10 @@ public:
       }
     }
 
+    if (total <= 0) {
+      throw std::out_of_range("total is negative");
+    }
+
     return sqrt(total / (target.GetSize() * 3.0f)) / 255;;
   }
 
