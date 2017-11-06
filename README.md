@@ -3,7 +3,6 @@
 &nbsp;[Introduction](https://github.com/mtrebi/ImagesPrimitives#introduction)  <br/> 
 &nbsp;[Build](https://github.com/mtrebi/ImagesPrimitives#build)  <br/>
 &nbsp;[Execution](https://github.com/mtrebi/ImagesPrimitives#execution)  <br/>
-&nbsp;[How it works](https://github.com/mtrebi/ImagesPrimitives#how-it-works)  <br/>
 &nbsp;[Gallery](https://github.com/mtrebi/ImagesPrimitives#gallery)  <br/>
 &nbsp;[Notes](https://github.com/mtrebi/ImagesPrimitives#notes)  <br/>
 
@@ -11,6 +10,13 @@
 
 ## Introduction
 
+This project aims to reproduce an image using geometric primitives (triangles or ellipses). The algorithm takes an input image and tries to minimize the difference between the input image (or *target*) and the generated image (or *current*) by adding geometric shapes. To calculate the difference between two images I use the RSME (Root-Square Mean Error) between the colour components of each pixel.
+
+In order to find a good primitive the algorithm generates several random shapes and picks only the best of them. Then, it applies a mutation (a change) to the primitive. A mutation can be changing one vertex position on X or Y, or changing the ellipses radius, etc...If this mutation has improved the difference between the images and makes them more similar we keep it. This step is performed several times until a certain condition is met (for example, the number of mutations). This process is known as Hill Climbing. Since Hill Climbing can easily get stuck in local minimums, we actually performed all this process on each thread. This way, the probability of falling in a local minimum is lower. After all, we end up with one primitive per each thread and we pick only the best one of them. This best shape will be added to the current image and the process will start again until a certain number of primitives had been added to the image.
+
+This cute Dog is generated with 500 triangles:
+
+![Generating cute Dog](https://raw.githubusercontent.com/mtrebi/ImagesPrimitives/master/docs/images/sona_500t.gif)
 
 ## Build
 
@@ -59,8 +65,6 @@ After building the executable you can execute it using the following arguments.
 | `a` | 128 | Alpha value used for geometric primitives |
 | `n` | 250 | Number of geometric primitives used |
 | `p` | 0 | Geometric primitive used. 0 - Triangles, 1 - Ellipses |
-
-## How it works
 
 ## Gallery
 
