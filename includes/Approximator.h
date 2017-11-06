@@ -16,14 +16,14 @@ private:
   ctpl::thread_pool thread_pool_;
   
   void MultiThreadingBestHillClimb(Model& model, const ShapeType& shape_type, const int alpha, const int n_climbs, const int max_climbs, const int n_random_state, const int max_random) {
-    std::future<State> results[kN_THREADS];
-    for (int i = 0; i < kN_THREADS; ++i) {
+    std::vector<std::future<State>> results;
+    for (int i = 0; i < N_THREADS; ++i) {
       RandomGenerator generator(i);
-      results[i] = thread_pool_.push(std::bind(&Model::BestHillClimb, std::ref(model_), std::ref(generator), shape_type, alpha, n_climbs, max_climbs, n_random_state, max_random));
+      results.push_back(thread_pool_.push(std::bind(&Model::BestHillClimb, std::ref(model_), std::ref(generator), shape_type, alpha, n_climbs, max_climbs, n_random_state, max_random)));
     }
 
     State best_state, state;
-    for (int i = 0; i < kN_THREADS; ++i) {
+    for (int i = 0; i < N_THREADS; ++i) {
       if (results[i].valid()) {
         state = results[i].get();
         if (i == 0 || state.energy < best_state.energy) {
@@ -36,32 +36,38 @@ private:
   }
 
 public:
-  static const int kN_THREADS = 16;
-  const int kN_SHAPES = 1500;
-  const int kN_RANDOM_STATE = 1000;  
-  const int kN_CLIMBS = 100;       
-  const int kALPHA = 128;
-  const int kMAX_CLIMBS = 1000;
-  const int kMAX_RANDOM = 32;
+  std::string OUTPUT_PATH = "";
+  ShapeType SHAPE_TYPE;
 
-  const std::string kPATH = "Output/lion.bmp";
-  const std::string kPATH_GIF = "Output/gif/lion";
-  const ShapeType kSHAPE_TYPE = ShapeType::ELLIPSE;
-  static const bool kGIF = false;
+  int N_THREADS;
+  int N_RANDOM_STATE;
+  int N_CLIMBS;
+  int MAX_CLIMBS;
+  int MAX_RANDOM;
+  int ALPHA;
+  int N_SHAPES;
 
-  Approximator(const Image& target) :
+  bool GIF;
+
+  Approximator(const Image& target, const int n_threads) :
     model_(target, Utils::AverageColor(target)),
-    thread_pool_(kN_THREADS) {
+    N_THREADS(n_threads),
+    thread_pool_(n_threads) {
   }
 
   void Run() {
-    for (int i = 0; i < kN_SHAPES; ++i) {
+    std::cout << "Starting..." << std::endl;
+
+    for (int i = 0; i < N_SHAPES; ++i) {
       std::cout << i << ": " << model_.GetEnergy() << std::endl;
-      MultiThreadingBestHillClimb(model_, kSHAPE_TYPE, kALPHA, kN_CLIMBS, kMAX_CLIMBS, kN_RANDOM_STATE, kMAX_RANDOM);
-      if (kGIF) {
-       model_.Export(kPATH_GIF + std::to_string(i) + ".bmp");
+      MultiThreadingBestHillClimb(model_, SHAPE_TYPE, ALPHA, N_CLIMBS, MAX_CLIMBS, N_RANDOM_STATE, MAX_RANDOM);
+      if (GIF) {
+        std::string gif_path = OUTPUT_PATH;
+        model_.Export(gif_path.insert(gif_path.length() - 4, std::to_string(i)));
       }
     }
-    model_.Export(kPATH);
+    model_.Export(OUTPUT_PATH);
+    std::cout << "Output stored at "  + OUTPUT_PATH << std::endl;
+    std::cout << "Finishing..." << std::endl;
   }
 };
