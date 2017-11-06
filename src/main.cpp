@@ -76,12 +76,12 @@ int main(int argc, char **argv) {
         break;
       default:
         PrintHelp();
-        abort();
+        return -1;
       }
       break;
     default:
       PrintHelp();
-      abort();
+      return -1;
     }
   }
 
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 
   const Image target = Image(input);
   if (target.GetSize() == 1) {
-    abort();
+    return -1;
   }
 
   Approximator approximator(target, n_threads);
