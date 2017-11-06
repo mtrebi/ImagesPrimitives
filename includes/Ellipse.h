@@ -16,13 +16,13 @@ private:
   int rx_, ry_;
 
 public:
-  Ellipse(RandomGenerator& generator, const int width, const int height)
-    : Shape(generator, width, height) {
+  Ellipse(RandomGenerator& generator, const int width, const int height, const int max_random)
+    : Shape(generator, width, height, max_random) {
     c_.x = generator_->Random(0, width_);
     c_.y = generator_->Random(0, width_);
 
-    rx_ = generator_->Random(1, 31);
-    ry_ = generator_->Random(1, 31);
+    rx_ = generator_->Random(1, max_random_ * 2 - 1);
+    ry_ = generator_->Random(1, max_random_ * 2 - 1);
   }
 
   virtual ~Ellipse() { }
@@ -72,14 +72,14 @@ public:
     const int random_vertex = generator_->Random(0, 2);
     switch (random_vertex) {
     case 0:
-      c_.x = Utils::Clamp(c_.x + generator_->Random(-16, 16), 0, width_ - 1);
-      c_.y = Utils::Clamp(c_.y + generator_->Random(-16, 16), 0, height_ - 1);
+      c_.x = Utils::Clamp(c_.x + generator_->Random(-max_random_, max_random_), 0, width_ - 1);
+      c_.y = Utils::Clamp(c_.y + generator_->Random(-max_random_, max_random_), 0, height_ - 1);
       break;
     case 1:
-      rx_ = Utils::Clamp(rx_ + generator_->Random(-16, 16), 1, width_ - 1);
+      rx_ = Utils::Clamp(rx_ + generator_->Random(-max_random_, max_random_), 1, width_ - 1);
       break;
     case 2:
-      ry_ = Utils::Clamp(ry_ + generator_->Random(-16, 16), 1, height_ - 1);
+      ry_ = Utils::Clamp(ry_ + generator_->Random(-max_random_, max_random_), 1, height_ - 1);
       break;
     }
   }

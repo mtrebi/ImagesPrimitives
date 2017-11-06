@@ -7,12 +7,12 @@
 
 class Shape {
 protected:
-  int width_, height_;
+  int width_, height_, max_random_;
   std::vector<Scanline> lines_;
   bool has_changed_ = true;
   RandomGenerator* generator_;
 public:
-  Shape(RandomGenerator& g, const int w, const int h) : generator_(&g), width_(w), height_(h){}
+  Shape(RandomGenerator& g, const int w, const int h, const int mr) : generator_(&g), width_(w), height_(h), max_random_(mr){}
 
   virtual ~Shape(){ }
 

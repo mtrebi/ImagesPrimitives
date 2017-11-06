@@ -92,17 +92,17 @@ private:
   }
 
 public:  
-  Triangle(RandomGenerator& generator, const int width, const int height)
-    : Shape(generator, width, height){
+  Triangle(RandomGenerator& generator, const int width, const int height, const int max_random)
+    : Shape(generator, width, height, max_random){
 
     v0_.x = generator_->Random(0, width_);
     v0_.y = generator_->Random(0, height_);
 
-    v1_.x = v0_.x + generator_->Random(-16, 16);
-    v1_.y = v0_.y + generator_->Random(-16, 16);
+    v1_.x = v0_.x + generator_->Random(-max_random_, max_random_);
+    v1_.y = v0_.y + generator_->Random(-max_random_, max_random_);
 
-    v2_.x = v0_.x + generator_->Random(-16, 16);
-    v2_.y = v0_.y + generator_->Random(-16, 16);
+    v2_.x = v0_.x + generator_->Random(-max_random_, max_random_);
+    v2_.y = v0_.y + generator_->Random(-max_random_, max_random_);
   }
 
   virtual ~Triangle() { }
@@ -135,16 +135,16 @@ public:
       const int random_vertex = generator_->Random(0, 2);
       switch (random_vertex) {
       case 0:
-        v0_.x = Utils::Clamp(v0_.x + generator_->Random(-16, 16), 0, width_ - 1);
-        v0_.y = Utils::Clamp(v0_.y + generator_->Random(-16, 16), 0, height_ - 1);
+        v0_.x = Utils::Clamp(v0_.x + generator_->Random(-max_random_, max_random_), 0, width_ - 1);
+        v0_.y = Utils::Clamp(v0_.y + generator_->Random(-max_random_, max_random_), 0, height_ - 1);
         break;
       case 1:
-        v1_.x = Utils::Clamp(v1_.x + generator_->Random(-16, 16), 0, width_ - 1);
-        v1_.y = Utils::Clamp(v1_.y + generator_->Random(-16, 16), 0, height_ - 1);
+        v1_.x = Utils::Clamp(v1_.x + generator_->Random(-max_random_, max_random_), 0, width_ - 1);
+        v1_.y = Utils::Clamp(v1_.y + generator_->Random(-max_random_, max_random_), 0, height_ - 1);
         break;
       case 2:
-        v2_.x = Utils::Clamp(v2_.x + generator_->Random(-16, 16), 0, width_ - 1);
-        v2_.y = Utils::Clamp(v2_.y + generator_->Random(-16, 16), 0, height_ - 1);
+        v2_.x = Utils::Clamp(v2_.x + generator_->Random(-max_random_, max_random_), 0, width_ - 1);
+        v2_.y = Utils::Clamp(v2_.y + generator_->Random(-max_random_, max_random_), 0, height_ - 1);
         break;
       }
       if (Valid()) {

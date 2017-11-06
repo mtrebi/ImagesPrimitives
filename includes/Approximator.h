@@ -15,11 +15,11 @@ private:
   Model model_;
   ctpl::thread_pool thread_pool_;
   
-  void MultiThreadingBestHillClimb(Model& model, const ShapeType& shape_type, const int alpha, const int n_climbs, const int max_climbs, const int n_random_state) {
+  void MultiThreadingBestHillClimb(Model& model, const ShapeType& shape_type, const int alpha, const int n_climbs, const int max_climbs, const int n_random_state, const int max_random) {
     std::future<State> results[kN_THREADS];
     for (int i = 0; i < kN_THREADS; ++i) {
       RandomGenerator generator(i);
-      results[i] = thread_pool_.push(std::bind(&Model::BestHillClimb, std::ref(model_), std::ref(generator), shape_type, alpha, n_climbs, max_climbs, n_random_state));
+      results[i] = thread_pool_.push(std::bind(&Model::BestHillClimb, std::ref(model_), std::ref(generator), shape_type, alpha, n_climbs, max_climbs, n_random_state, max_random));
     }
 
     State best_state, state;
@@ -42,6 +42,7 @@ public:
   const int kN_CLIMBS = 100;       
   const int kALPHA = 128;
   const int kMAX_CLIMBS = 1000;
+  const int kMAX_RANDOM = 32;
 
   const std::string kPATH = "Output/lion.bmp";
   const std::string kPATH_GIF = "Output/gif/lion";
@@ -56,7 +57,7 @@ public:
   void Run() {
     for (int i = 0; i < kN_SHAPES; ++i) {
       std::cout << i << ": " << model_.GetEnergy() << std::endl;
-      MultiThreadingBestHillClimb(model_, kSHAPE_TYPE, kALPHA, kN_CLIMBS, kMAX_CLIMBS, kN_RANDOM_STATE);
+      MultiThreadingBestHillClimb(model_, kSHAPE_TYPE, kALPHA, kN_CLIMBS, kMAX_CLIMBS, kN_RANDOM_STATE, kMAX_RANDOM);
       if (kGIF) {
        model_.Export(kPATH_GIF + std::to_string(i) + ".bmp");
       }

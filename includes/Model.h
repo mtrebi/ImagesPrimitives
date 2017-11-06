@@ -18,11 +18,11 @@ private:
   RGBApixel background_color_;
   float energy_;
 
-  State BestRandomState(RandomGenerator& generator, const ShapeType& shape_type, const int n_random_state, const int alpha) {
+  State BestRandomState(RandomGenerator& generator, const ShapeType& shape_type, const int n_random_state, const int alpha, const int max_random) {
     State best_state, state;
 
     for (int i = 0; i < n_random_state; ++i) {
-      state = RandomState(generator, shape_type, alpha);
+      state = RandomState(generator, shape_type, alpha, max_random);
       if (i == 0 || state.energy < best_state.energy) {
         best_state = state;
       }
@@ -30,16 +30,16 @@ private:
     return best_state;
   }
 
-  State RandomState(RandomGenerator& generator, const ShapeType& shape_type, const int alpha) {
+  State RandomState(RandomGenerator& generator, const ShapeType& shape_type, const int alpha, const int max_random) {
     State state;
     state.alpha = alpha;
 
     switch (shape_type) {
     case ShapeType::TRIANGLE:
-      state.shape = std::shared_ptr<Shape>(new Triangle(generator, target_.GetWidth(), target_.GetHeight()));
+      state.shape = std::shared_ptr<Shape>(new Triangle(generator, target_.GetWidth(), target_.GetHeight(), max_random));
       break;
     case ShapeType::ELLIPSE:
-      state.shape = std::shared_ptr<Shape>(new Ellipse(generator, target_.GetWidth(), target_.GetHeight()));
+      state.shape = std::shared_ptr<Shape>(new Ellipse(generator, target_.GetWidth(), target_.GetHeight(), max_random));
       break;
     }
 
@@ -127,8 +127,8 @@ public:
   float GetEnergy() const { return energy_; }
   bool Export(const std::string path) { return current_.Export(path); }
 
-  State BestHillClimb(RandomGenerator& generator, const ShapeType& shape_type,const int alpha, const int n_climbs, const int max_climbs, const int n_random_state) {
-    State best_random_state = BestRandomState(generator, shape_type, n_random_state, alpha);
+  State BestHillClimb(RandomGenerator& generator, const ShapeType& shape_type,const int alpha, const int n_climbs, const int max_climbs, const int n_random_state, const int max_random) {
+    State best_random_state = BestRandomState(generator, shape_type, n_random_state, alpha, max_random);
     State best_hillclimb_state = HillClimb(best_random_state, n_climbs, max_climbs);
     std::cout << "\t" << n_random_state << "x random: " << best_random_state.energy << " -> " << n_climbs << "x hill climb: " << best_hillclimb_state.energy << std::endl;
     return best_hillclimb_state;
