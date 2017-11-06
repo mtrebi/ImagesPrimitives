@@ -76,6 +76,8 @@ Example images generated with my code:
 
 ![Colorful Lion generated using 1000 ellipses](https://raw.githubusercontent.com/mtrebi/ImagesPrimitives/master/docs/images/lion_small_1000e.bmp)
 
+![Picture of Girona generated using 4000 triangles](https://raw.githubusercontent.com/mtrebi/ImagesPrimitives/master/docs/images/girona2_4000t.bmp)
+
 ![Picture of Girona generated using 4000 ellipses](https://raw.githubusercontent.com/mtrebi/ImagesPrimitives/master/docs/images/girona_4000e.bmp)
 
 ## Notes
