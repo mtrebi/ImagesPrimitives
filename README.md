@@ -60,7 +60,6 @@ After building the executable you can execute it using the following arguments.
 | `s` | 1000 | Number of random states generated |
 | `c` | 100 | Number of Hill Climb steps |
 | `m` | 1000 | Maximum number of Hill Climb evaluations. |
-| `s` | 1024 | output image size |
 | `r` | 16 | Maximum random used for generations/mutations |
 | `a` | 128 | Alpha value used for geometric primitives |
 | `n` | 250 | Number of geometric primitives used |
