@@ -5,6 +5,7 @@
 &nbsp;[Execution](https://github.com/mtrebi/ImagesPrimitives#execution)  <br/>
 &nbsp;[Gallery](https://github.com/mtrebi/ImagesPrimitives#gallery)  <br/>
 &nbsp;[Notes](https://github.com/mtrebi/ImagesPrimitives#notes)  <br/>
+&nbsp;[Final Result](https://github.com/mtrebi/ImagesPrimitives#final-result)  <br/>
 
 ----------
 
@@ -84,4 +85,8 @@ Example images generated with my code:
 - It is also based on [Geometrize Haxe](https://github.com/Tw1ddle/geometrize-haxe), a Haxe library created by Sam Twidale
 - This project has far less features than the previous libraries. This is because goal of this project was to generate an image, print it on a canvas and give it to my girlfriend as a present for her birthay.
 
-[Picture of the canvas for my gf!]
+## Final result
+
+This is the result of generating an image with this code and printing it directly on a canvas:
+
+![Image printed on a Canvas](https://raw.githubusercontent.com/mtrebi/ImagesPrimitives/master/docs/images/canvas_gift.jpg)
